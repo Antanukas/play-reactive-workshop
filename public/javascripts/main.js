@@ -1,1 +1,1 @@
-console.log('Hi dude 2');
+console.log('Main loaded everywhere');

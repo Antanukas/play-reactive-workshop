@@ -1,0 +1,1 @@
+console.log('This is comments js loaded only in comments page')

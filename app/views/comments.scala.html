@@ -1,0 +1,9 @@
+@(repoId: String, webJarAssets: WebJarAssets)
+
+@scripts = {
+<script src="@routes.Assets.versioned("javascripts/comments.js")" type="text/javascript"></script>
+}
+
+@main("Github repository comments", webJarAssets, scripts) {
+    <h1>Comments page for @repoId</h1>
+}
