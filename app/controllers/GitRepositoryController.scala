@@ -5,24 +5,22 @@ import javax.inject.Inject
 import models.{GitHubRepositoryId, GitRepository}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
-import services.UserService
+import services.{GitRepositoryService, UserService}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class GitRepositoryController @Inject() (userService: UserService)(implicit exec: ExecutionContext) extends Controller {
+class GitRepositoryController @Inject()(service: GitRepositoryService)
+  (implicit exec: ExecutionContext) extends RestController {
 
   import models.JsonConverters._
 
   def search(query: String) = Action.async {
-    Future {
-      val data: Seq[GitRepository] = Seq(
-        GitRepository(GitHubRepositoryId("11"), "Some repo", 5),
-        GitRepository(GitHubRepositoryId("11"), "Some repo 2", 21),
-        GitRepository(GitHubRepositoryId("11"), "Some repo 3", 44))
-      Thread.sleep(5000)
-      Ok(Json.toJson(data)) }
+    service.search(query).map(toOkJson(_))
   }
 
+  def get(repoId: GitHubRepositoryId) = Action.async {
+    service.get(repoId).map(toOkJson(_))
+  }
 
 
 }

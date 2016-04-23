@@ -1,24 +1,36 @@
-import java.time.ZonedDateTime
-
+import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.mvc.PathBindable
 
 package object models {
 
-  //User models
+  trait BusinessEvent
   trait ModelId[T] {
     def value: T
   }
+
+  //User
   case class UserId(value: String) extends ModelId[String]
   case class User(id: UserId, username: String)
-  case class CreateUser(username: String)
+  case class LoginAttempt(username: String)
 
+  //Comments
   case class NewComment(userId: UserId, gitHubId: GitHubRepositoryId, text: String)
-  case class Comment(userId: UserId, gitHubId: GitHubRepositoryId, text: String, createdOn: ZonedDateTime)
+  case class Comment(
+    id: Long,
+    userId: UserId,
+    username: String,
+    gitHubId: GitHubRepositoryId,
+    text: String,
+    createdOn: DateTime)
+  case class NewCommentEvent(gitHubId: GitHubRepositoryId, commentId: Long) extends BusinessEvent
 
+  //Repository
   case class GitHubRepositoryId(value: String) extends ModelId[String]
-  case class GitRepository(id: GitHubRepositoryId, name: String, commentCount: Int)
+  case class GitRepository(id: GitHubRepositoryId, name: String, commentCount: Int, openIssueCount: BigDecimal)
 
+  //Play specific things needed for models to be jsonified
+  //TODO move away
   object JsonConverters {
 
     implicit val githubIdReads = idReads(GitHubRepositoryId(_))
@@ -26,7 +38,7 @@ package object models {
     implicit val userIdReads = idReads(UserId(_))
     implicit val userIdWrites = idWrites[UserId]()
     implicit val userFormat = Json.format[User]
-    implicit val createUserFormat = Json.format[CreateUser]
+    implicit val loginAttemptFormat = Json.format[LoginAttempt]
     implicit val gitRepositoryFormat = Json.format[GitRepository]
     implicit val commentFormat = Json.format[Comment]
     implicit val newCommentFormat = Json.format[NewComment]

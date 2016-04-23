@@ -15,6 +15,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-slick-evolutions" % "2.0.0",
   "com.h2database" % "h2" % "1.4.191",
   "com.github.tototoshi" %% "slick-joda-mapper" % "2.0.0",
+  "net.codingwell" %% "scala-guice" % "4.0.1",
+
 
   "org.webjars" %% "webjars-play" % "2.5.0",
   "org.webjars" % "bootstrap" % "3.3.6",

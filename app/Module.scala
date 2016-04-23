@@ -1,6 +1,8 @@
 import java.time.Clock
 
 import com.google.inject.AbstractModule
+import net.codingwell.scalaguice.ScalaModule
+import services.{ConcurrentBroadcastEventPublisher, EventPublisher}
 
 /**
  * This class is a Guice module that tells Guice how to bind several
@@ -12,11 +14,10 @@ import com.google.inject.AbstractModule
  * adding `play.modules.enabled` settings to the `application.conf`
  * configuration file.
  */
-class Module extends AbstractModule {
+class Module extends AbstractModule with ScalaModule {
 
   override def configure() = {
-    // Use the system clock as the default implementation of Clock
-    bind(classOf[Clock]).toInstance(Clock.systemDefaultZone)
+    bind[Clock].toInstance(Clock.systemDefaultZone)
+    bind[EventPublisher].to[ConcurrentBroadcastEventPublisher]
   }
-
 }
