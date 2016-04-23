@@ -1,7 +1,7 @@
-import models.{UserId, User, Tweet}
-import org.scalatest.{Matchers, FlatSpec}
-import play.api.mvc.Results
 
+import org.scalatest.{BeforeAndAfterEach, FreeSpec, Matchers, FlatSpec}
+
+import scala.Int
 import scala.concurrent.duration.Duration.Inf
 import scala.concurrent.{Await, Future}
 
@@ -9,29 +9,41 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Success, Failure}
 
-class IntroductionSpec extends FlatSpec with Matchers {
+class IntroductionSpec extends FreeSpec with Matchers with BeforeAndAfterEach {
+
+  override def afterEach {
+    ANGRY_CACHE_FAILS = true
+    CACHE_RETURNS_VALUE = false
+  }
 
   // TODO: consider replace FlatSpec to something more suitable
 
-  "Future that returns String " should "be created " in {
-    val future = Future {
+  case class User(userId: Long, username: String, twitterName: String)
+
+  case class Tweet(name: String, message: String)
+
+
+  "Future that returns String should be created " in {
+    val future: Future[String] = Future {
       "Simple Future"
     }
 
     Await.result(future, Inf) shouldBe "Simple Future"
   }
 
-  "Future that returns `Tweet` case class instance" should "be created " in {
+  "Future that returns `Tweet` case class instance should be created " in {
     val future = Future {
       Tweet("1", "What a great conference!")
     }
 
     Await.result(future, Inf) shouldBe Tweet("1", "What a great conference!")
-    future.failed
   }
 
-  "Future with failed execution" should "be created " in {
+  "Future with failed execution should be created " in {
     val future = Future.failed(new RuntimeException("Something bad"))
+//    val future =  Future {
+//      throw new RuntimeException("Error...")
+//    }
 
     Await.ready(future, Inf).onComplete {
       case Failure(e) => e shouldBe a [RuntimeException]
@@ -39,15 +51,15 @@ class IntroductionSpec extends FlatSpec with Matchers {
     }
   }
 
-  "Future tweet" should "be mapped to string message" in {
+  "Future tweet should be mapped to string message" in {
     val tweet = Future.successful(Tweet("Homer", "Nice conference indeed!"))
 
-    val message = tweet.map(t => s"${t.userId}: ${t.text}")
+    val message = tweet.map(t => s"${t.name}: ${t.message}")
 
     Await.result(message, Inf) shouldBe "Homer: Nice conference indeed!"
   }
 
-  "Future holding list of strings" should "be mapped to strings length " in {
+  "Future holding list of strings should be mapped to strings length " in {
     val tweetFuture = Future {
       List("You", "should", "map", "this", "to", "")
     }
@@ -58,10 +70,10 @@ class IntroductionSpec extends FlatSpec with Matchers {
   }
 
 
-  "Future " should " fail if filter condition fails " in {
+  "Future  should  fail if filter condition fails " in {
     val emptyTweet = Future.successful(Tweet("Homer", ""))
 
-    val emptyTweetFutureFailed = emptyTweet.filter(t => !t.text.isEmpty)
+    val emptyTweetFutureFailed = emptyTweet.filter(t => !t.message.isEmpty)
 
     Await.ready(emptyTweetFutureFailed, Inf).onComplete {
       case Failure(e) => e shouldBe a [NoSuchElementException]
@@ -69,72 +81,172 @@ class IntroductionSpec extends FlatSpec with Matchers {
     }
   }
 
-  "Future " should " return same value if filter succeed " in {
+  "Future  should  return same value if filter succeed " in {
     val tweet = Future.successful(Tweet("Homer", "Nice conference indeed!"))
 
-    val notEmptyTweetFuture = tweet.filter(t => !t.text.isEmpty)
+    val notEmptyTweetFuture = tweet.filter(t => !t.message.isEmpty)
 
     Await.ready(notEmptyTweetFuture, Inf).onComplete {
-      case Failure(_) => fail("Future should be cussesful")
-      case Success(t) => t.userId shouldBe "Homer"
+      case Failure(_) => fail("Future should be successful")
+      case Success(t) => t.name shouldBe "Homer"
     }
+  }
+
+
+
+  /**
+   * Pretend that this function is call to cache
+   *
+   * Returns Future[Option[User]] from user id. option is empty is user not exists in cache
+   */
+  var CACHE_RETURNS_VALUE = false
+  def cacheCall(userId: Long): Future[Option[User]] = {
+    if (CACHE_RETURNS_VALUE) Future.successful(Some(User(userId, "Spongebob","@Sponge")))
+    else Future.successful(None)
   }
 
   /**
    * Pretend that this function is db call which returns Future of db call result
+   *
+   * Returns Future[User] from user id
    */
+  def dbCall(userId: Long): Future[User] = Future.successful(User(userId, "Spongebob","@Sponge"))
 
-  /** Returns Future[User] from user id */
-  def dbCall(userId: UserId) = Future.successful(User(userId, "Spongebob"))
+  /**
+   * Pretend that this function is some external api call that may took a while
+   *
+   * Return Future[List[Tweet]] from username
+   */
+  def apiCall(userName: String): Future[List[Tweet]] = Future {
+    Thread.sleep(100)
+    List(Tweet("Spongebob", "My pants are square shaped"))
+  }
 
-  /** Return Future[List[Tweet]] from username */
-  def apiCall(userName: String) = Future(List(Tweet("Spongebob", "My pants are square shaped")))
-
-  "Dbcall future " should " be combined with api call using flatmap" in {
+  "Combine two futures with flatMap" in {
     // First dbCall should be resolved and only then apiCall can be performed since it need data from dbCall
 
-    val tweetsFuture = dbCall("123")
+    val tweetsFuture = dbCall(123)
         .flatMap(user => apiCall(user.username))
 
     Await.result(tweetsFuture, Inf) shouldBe List(Tweet("Spongebob", "My pants are square shaped"))
   }
 
-  "Same flatmap" should " be written using for comprehension " in {
+  "Same flatmap should be written using for comprehension " in {
 
     val eventualTweets = for {
-      db <- dbCall("123")
+      db <- dbCall(123)
       tweets <- apiCall(db.username)
     } yield tweets
 
     Await.result(eventualTweets, Inf) shouldBe List(Tweet("Spongebob", "My pants are square shaped"))
   }
 
-  "Two futures " should " be zipped together" in {
+  "Flatmap more complex example" in {  // TODO: maybe move to bottom
+    // Try to:
+    // 1. retrieve value from cache - `cacheCall`
+    //   If value present:
+    //      - then do `apiCall`
+    //   else
+    //      - retrieve value from database - `dbCall`
+    //      - do apiCall
+    //
+
+    val result = cacheCall(123).flatMap {
+      case Some(user) => apiCall(user.username)
+      case None => dbCall(123).flatMap(user => apiCall(user.username))
+    }
+
+    // Try to write it with for comprehension
+
+    Await.result(result, Inf) shouldBe List(Tweet("Spongebob", "My pants are square shaped"))
+  }
+
+  "Two futures should be zipped together" in {
     // If calls are independent from one another we can use zip function to work with two futures result
     // When zipping Future[T1] and Future[T2] zip result is Future[(T1, T2)].
 
-    val zipped = dbCall("123").zip(dbCall("321"))
+    val zipped = dbCall(123).zip(dbCall(321))
 
-    Await.result(zipped, Inf) shouldBe (User("123", "Spongebob"), User("321", "Spongebob"))
+    Await.result(zipped, Inf) shouldBe (User(123, "Spongebob", "@Sponge"), User(321, "Spongebob", "@Sponge"))
   }
 
-  "Two futures " should " be zipped and mapped together" in {
+  "Two futures should be zipped and mapped together" in {
     // Try zip two api calls and map zipped future to Future[Int] where Int represents number of total tweets
 
-    val tweetsCountFuture = apiCall("Homer").zip(apiCall("Spongebob"))
+    val homerTweets = apiCall("Homer")
+    val spongeBobTweets = apiCall("Spongebob")
+
+    val tweetsCountFuture = homerTweets.zip(spongeBobTweets)
         .map { case (t1, t2) => t1.length + t2.length}
 
     Await.result(tweetsCountFuture, Inf) shouldBe 2
   }
 
 
+  var ANGRY_CACHE_FAILS = true
+  def angryCacheCall(userId: Long): Future[Option[User]] = {
+    if (ANGRY_CACHE_FAILS) Future.failed(new RuntimeException("Value unavailable"))
+    else Future(Option(User(1, "Stewie Griffin", "@Stewie")))
+  }
 
-  // andThen - with side effects
+  "If future fails we should recover default value" in {
+    // use angry cache to retrieve user, if it fails return default user
+    val defaultUser = User(1, "Homer", "@Homer")
+
+    val recoverFuture = angryCacheCall(123).recover {
+      case e: IllegalArgumentException => User(1, "Me", "Me")
+      case e: RuntimeException => defaultUser
+    }
+
+    Await.ready(recoverFuture, Inf).onComplete {
+      case Failure(_) => fail("Future should recover from RuntimeException")
+      case Success(user) =>  user shouldBe defaultUser
+    }
+  }
+
+  "If future fails we should recover with another call to cache" in {
+    // use angry cache to retrieve user, if it fails return try to call another cache, which is not so angry `cacheCall`
+    // if `cacheCall` returns empty then return default user.
+    val defaultUser = User(1, "Homer", "@Homer")
+
+    def recoverFuture = angryCacheCall(123).recoverWith {
+      case e: RuntimeException => cacheCall(123)
+    }.map {
+      case Some(u) => u
+      case None => defaultUser
+    }
+
+    // this could be omplemented with fallbackTo as well
+
+    ANGRY_CACHE_FAILS = true
+    CACHE_RETURNS_VALUE = false
+    // both cache calls have no value present
+    Await.result(recoverFuture, Inf).username shouldBe "Homer"
+
+    ANGRY_CACHE_FAILS = false
+    CACHE_RETURNS_VALUE = false
+    // angry cache returns correct value
+    Await.result(recoverFuture, Inf).username shouldBe "Stewie Griffin"
+
+    ANGRY_CACHE_FAILS = true
+    CACHE_RETURNS_VALUE = true
+    // angry cache returns correct value
+    Await.result(recoverFuture, Inf).username shouldBe "Spongebob"
+  }
+
+
+
+  // from list of futures make future[list[t]]
 
   // resilience
 
-  // recover and recover with
 
-  // from list of futures make future[list[t]]
+  //    spongeBobTweets.onSuccess {
+  //      case l => println(l)
+  //    }
+  //
+  //    spongeBobTweets.onFailure {
+  //      case throwble => println(throwble) // Send error report to ops
+  //    }
 
 }
