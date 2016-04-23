@@ -25,4 +25,4 @@ libraryDependencies ++= Seq(
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 
-routesImport += "models.Binders._"
+routesImport += "controllers.converters.Binders._"

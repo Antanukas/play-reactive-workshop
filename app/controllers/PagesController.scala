@@ -10,11 +10,11 @@ import scala.concurrent.{ExecutionContext, Future}
 class PagesController @Inject()(webJarAssets: WebJarAssets)(implicit ec: ExecutionContext) extends Controller {
 
   def index = Action {
-    Ok(views.html.index(webJarAssets))
+    Ok(pages.html.index(webJarAssets))
   }
 
   def comments(repoId: String) = Action {
-    Ok(views.html.comments(repoId, webJarAssets))
+    Ok(pages.html.comments(repoId, webJarAssets))
   }
 
 }

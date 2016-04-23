@@ -12,7 +12,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class GitRepositoryController @Inject()(service: GitRepositoryService)
   (implicit exec: ExecutionContext) extends RestController {
 
-  import models.JsonConverters._
+  import controllers.converters.JsonConverters._
 
   def search(query: String) = Action.async {
     service.search(query).map(toOkJson(_))

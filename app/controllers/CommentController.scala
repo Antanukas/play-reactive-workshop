@@ -16,7 +16,7 @@ class CommentController @Inject() (commentService: CommentService)
 
   val EventStreamAccept = Accepting(MimeTypes.EVENT_STREAM)
 
-  import models.JsonConverters._
+  import controllers.converters.JsonConverters._
 
   def get(repoId: GitHubRepositoryId) = Action.async { implicit req =>
     render.async {

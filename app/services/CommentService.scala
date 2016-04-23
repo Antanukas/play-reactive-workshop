@@ -14,9 +14,9 @@ class CommentService @Inject() (eventPublisher: EventPublisher)(implicit exec: E
 
   val commentCount  = new AtomicInteger(5)
   var comments = Seq(
-    Comment(id = 0, userId = UserId("1"), username="Vasia", gitHubId = GitHubRepositoryId("4"), text = "Some nice message", createdOn = DateTime.now()),
-    Comment(id = 1, userId = UserId("2"), username="Vadimka", gitHubId = GitHubRepositoryId("4"), text = "Some message", createdOn = DateTime.now()),
-    Comment(id = 2, userId = UserId("3"), username="Tajana", gitHubId = GitHubRepositoryId("4"), text = "OMG", createdOn = DateTime.now()))
+    Comment(id = CommentId(0), userId = UserId("1"), username="Vasia", gitHubId = GitHubRepositoryId("4"), text = "Some nice message", createdOn = DateTime.now()),
+    Comment(id = CommentId(1), userId = UserId("2"), username="Vadimka", gitHubId = GitHubRepositoryId("4"), text = "Some message", createdOn = DateTime.now()),
+    Comment(id = CommentId(2), userId = UserId("3"), username="Tajana", gitHubId = GitHubRepositoryId("4"), text = "OMG", createdOn = DateTime.now()))
 
   val OldestToNewestOrdering: Ordering[DateTime] = Ordering.fromLessThan(_ isBefore _)
 
@@ -30,16 +30,16 @@ class CommentService @Inject() (eventPublisher: EventPublisher)(implicit exec: E
     .mapAsync(1) { _ => getRepositoryComments(repoId) }
 
   def create(repoId: GitHubRepositoryId, newComment: NewComment): Future[Comment] = {
-
-    val comment = Comment(
-      id = commentCount.incrementAndGet(),
+    Future { Comment(
+      id = CommentId(commentCount.incrementAndGet()),
       userId = newComment.userId,
       username = "Test" + newComment.userId,
       gitHubId = newComment.gitHubId,
       text = newComment.text,
       createdOn = DateTime.now())
-    comments = comments :+ comment //TODO persist
-    eventPublisher.publish(NewCommentEvent(repoId, comment.id))
-    Future (comment)
+    }.map { comment =>
+      comments = comments :+ comment //TODO persist
+      PublishableResult(comment, NewCommentEvent(repoId, comment.id))
+    }.map(eventPublisher.publishUnwrap)
   }
 }
