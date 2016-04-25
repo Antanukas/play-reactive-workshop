@@ -26,5 +26,5 @@ package object models {
 
   //Repository
   case class GitHubRepositoryId(value: String) extends ModelId[String]
-  case class GitRepository(id: GitHubRepositoryId, name: String, commentCount: Int, openIssueCount: BigDecimal)
+  case class GitRepository(id: GitHubRepositoryId, name: String, fullName: String, commentCount: Int, openIssueCount: BigDecimal)
 }

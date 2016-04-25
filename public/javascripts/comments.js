@@ -11,7 +11,7 @@ function init() {
     null,
     function(repository) {
       $('#repositoryName').text(repository.name);
-      $('repositoryIssueCount').text(repository.openIssueCount);
+      $('#repositoryIssueCount').text(repository.openIssueCount);
     });
   window.prw.apiCall("GET",
     '/api/repositories/' + repositoryId + '/comments',
