@@ -1,14 +1,14 @@
-@(repoId: String, webJarAssets: WebJarAssets)
+@(owner: String, repoName: String, webJarAssets: WebJarAssets)
 
 @scripts = {
 <script src="@routes.Assets.versioned("javascripts/comments.js")" type="text/javascript"></script>
 }
 
 @main("Github repository comments", webJarAssets, scripts) {
-<div id="repositoryId" style="display: none">@repoId</div>
+<div id="repositoryId" style="display: none">@repoName</div>
 <div style="padding-top: 30px">
   <div class="panel panel-default">
-    <div class="panel-heading">Github repository @repoId</div>
+    <div class="panel-heading">Github repository <span id="repoOwner">@owner</span>/<span id="repoName">@repoName</span></div>
     <div class="panel-body">
       <div>
         <div>

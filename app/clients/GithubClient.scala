@@ -1,42 +1,35 @@
 package clients
 
+import clients.Models.{GithubRepositoriesResponse, GithubRepositoryResponse}
 import com.google.inject.Inject
-import models.{GitHubRepositoryId, GitRepository}
-import play.api.libs.functional.syntax._
-import play.api.libs.json._
+import play.Configuration
 import play.api.libs.ws.{WSClient, WSResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
+import clients.Converters.{githubRepositoriesResponseRead, githubRepositoryResponseRead, githubRepositoryOwnerRead}
 
 
-class GithubClient @Inject()(val ws: WSClient)(implicit ex: ExecutionContext) {
+class GithubClient @Inject()(val ws: WSClient, val configuration: Configuration)(implicit ex: ExecutionContext) {
 
-  import Converters.githubRepositoryRead
+  private val searchEndpoint = configuration.getString("github-api.search-endpoint")
+  private val singleRepoEndpoint = configuration.getString("github-api.single-repo-endpoint")
+  private val token = Option.apply(configuration.getString("github-api.token"))
 
-  private val searchEndpoint: String => String = query => s"https://api.github.com/search/repositories?q=$query"
-  private val repoByNameEndpoint: String => String = fullName => s"https://api.github.com/repos/$fullName"
+  def searchRepositories(query: String): Future[GithubRepositoriesResponse]= {
+    println(token)
+    val responseFuture: Future[WSResponse] = ws.url(searchEndpoint)
+      .withQueryString(("q", query))
+      .get()
 
-  def searchRepositories(query: String): Future[Seq[GitRepository]]= {
-      val responseFuture: Future[WSResponse] = ws.url(searchEndpoint(query)).get()
-      responseFuture
-        .map(res => (res.json \ "items").as[Seq[GitRepository]])
-  }
-
-  def getRespository(fullName: String): Future[GitRepository] = {
-    val responseFuture: Future[WSResponse] = ws.url(repoByNameEndpoint(fullName)).get()
     responseFuture
-      .map(res => res.json.as[GitRepository])
+      .map(res => res.json.as[GithubRepositoriesResponse])
   }
-}
 
-object Converters {
-
-  implicit val githubRepositoryRead: Reads[GitRepository] = (
-   (__ \ "id").read[Int].map(i => GitHubRepositoryId(i.toString)) and
-   (__ \ "name").read[String] and
-   (__ \ "full_name").read[String] and
-   Reads(value => JsSuccess(0)) and
-   (__ \ "open_issues_count").read[BigDecimal]
- )(GitRepository.apply _)
-
+  def getRespository(owner: String, repoName: String): Future[GithubRepositoryResponse] = {
+    println(s"$singleRepoEndpoint/$owner/$repoName")
+    val responseFuture: Future[WSResponse] = ws.url(s"$singleRepoEndpoint/$owner/$repoName")
+      .get()
+    responseFuture
+      .map(res => res.json.as[GithubRepositoryResponse])
+  }
 }

@@ -1,7 +1,9 @@
-var repositoryId;
+var repositoryId, repoOwner, repoName;
 
 function init() {
-  repositoryId = $('#repositoryId').text();
+  repoOwner = $('#repoOwner').text();
+  repoName = $('#repoName').text();
+  repositoryId = repoOwner + '/' + repoName;
   adjustFormsVisibility();
   $('#loginButton').click(login);
   $('#logoutButton').click(logout);
@@ -44,7 +46,7 @@ function postMessage() {
   var text = $('#messageText').val();
   var reqBody = {
     userId: userId,
-    gitHubId: repositoryId,
+    gitHubId: {owner: repoOwner, name: repoName},
     text: text
   };
   window.prw.apiCall(

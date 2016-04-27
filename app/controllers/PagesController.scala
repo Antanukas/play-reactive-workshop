@@ -13,8 +13,8 @@ class PagesController @Inject()(webJarAssets: WebJarAssets)(implicit ec: Executi
     Ok(pages.html.index(webJarAssets))
   }
 
-  def comments(repoId: String) = Action {
-    Ok(pages.html.comments(repoId, webJarAssets))
+  def comments(owner: String, repoName: String) = Action {
+    Ok(pages.html.comments(owner, repoName, webJarAssets))
   }
 
 }

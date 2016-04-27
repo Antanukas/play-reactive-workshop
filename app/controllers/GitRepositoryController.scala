@@ -18,9 +18,7 @@ class GitRepositoryController @Inject()(service: GitRepositoryService)
     service.search(query).map(toOkJson(_))
   }
 
-  def get(repoId: GitHubRepositoryId) = Action.async {
-    service.get(repoId).map(toOkJson(_))
+  def get(owner: String, name: String) = Action.async {
+    service.get(GitHubRepositoryId(owner, name)).map(toOkJson(_))
   }
-
-
 }

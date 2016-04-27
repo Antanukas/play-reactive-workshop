@@ -5,12 +5,11 @@ import play.api.libs.json.{JsError, JsSuccess, Writes, _}
 
 object JsonConverters {
 
-  implicit val githubIdReads = idReads(GitHubRepositoryId(_))
-  implicit val githubIdWrites = idWrites[String, GitHubRepositoryId]()
   implicit val userIdReads = idReads(UserId(_))
   implicit val userIdWrites = idWrites[String, UserId]()
   implicit val commendIdReads = idReads(jsonValue => CommentId(jsonValue.toLong))
   implicit val commentIdWrites = idWrites[Long, CommentId]()
+  implicit val githubRepoIdFormat = Json.format[GitHubRepositoryId]
   implicit val userFormat = Json.format[User]
   implicit val loginAttemptFormat = Json.format[LoginAttempt]
   implicit val gitRepositoryFormat = Json.format[GitRepository]

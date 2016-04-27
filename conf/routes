@@ -4,7 +4,7 @@
 
 # Pages
 GET     /                           controllers.PagesController.index
-GET     /comments/:repoId           controllers.PagesController.comments(repoId: String)
+GET     /comments/:owner/:repoName  controllers.PagesController.comments(owner: String, repoName: String)
 
 # Api
 
@@ -12,12 +12,12 @@ GET     /comments/:repoId           controllers.PagesController.comments(repoId:
 POST    /api/users/actions/login    controllers.UserController.login
 
 # Github repositories
-GET     /api/repositories           controllers.GitRepositoryController.search(search)
-GET     /api/repositories/:repoId   controllers.GitRepositoryController.get(repoId: models.GitHubRepositoryId)
+GET     /api/repositories               controllers.GitRepositoryController.search(search)
+GET     /api/repositories/:owner/:name  controllers.GitRepositoryController.get(owner: String, name: String)
 
 # Github repository comments
-GET     /api/repositories/:repoId/comments controllers.CommentController.get(repoId: models.GitHubRepositoryId)
-POST    /api/repositories/:repoId/comments controllers.CommentController.create(repoId: models.GitHubRepositoryId)
+GET     /api/repositories/:owner/:name/comments controllers.CommentController.get(owner: String, name: String)
+POST    /api/repositories/:owner/:name/comments controllers.CommentController.create(owner: String, name: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

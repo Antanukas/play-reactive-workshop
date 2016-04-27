@@ -29,8 +29,10 @@ $('#doSearch').click(function(event) {
 
 function _renderRepository(repository, index) {
   return '<li id="' + _repoId(index) + '" class="list-group-item">' +
-  '         <span class="badge">' + repository.commentCount + '</span>'  +
-            '<a href="/comments/' + repository.gitHubId + '">' + repository.name + '</a>' +
+  '         <img class="avatar-img img-circle" src="' + repository.avatarUrl + '"></img>'  +
+            '<div class="repo-title"><h4>' + repository.name + '</h4>  <a href="/comments/' + repository.fullName + '">' + repository.fullName + '</a></div>' +
+  '         <span class="badge">' + repository.openIssueCount + ' open issues</span>' +
+  '         <span class="badge">'+ repository.commentCount + ' comments</span>'  +
   '       </li>';
 }
 

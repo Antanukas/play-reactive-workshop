@@ -5,3 +5,12 @@
 .comments-list .media {
     border-bottom: 1px dotted #ccc;
 }
+
+.repo-title {
+    display: inline-table;
+}
+.avatar-img {
+    max-width: 50px;
+    max-height: 50px;
+    margin: 7px;
+}

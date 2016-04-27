@@ -18,18 +18,18 @@ class CommentController @Inject() (commentService: CommentService)
 
   import controllers.converters.JsonConverters._
 
-  def get(repoId: GitHubRepositoryId) = Action.async { implicit req =>
+  def get(owner: String, name: String) = Action.async { implicit req =>
     render.async {
       case Accepts.Json() =>
-        commentService.getRepositoryComments(repoId).map(toOkJson(_))
+        commentService.getRepositoryComments(GitHubRepositoryId(owner, name)).map(toOkJson(_))
       case EventStreamAccept() =>
-        val source = commentService.getRepositoryCommentsSource(repoId).map(Json.toJson(_))
+        val source = commentService.getRepositoryCommentsSource(GitHubRepositoryId(owner, name)).map(Json.toJson(_))
         Future(Ok.chunked(source via EventSource.flow).as(ContentTypes.EVENT_STREAM))
     }
   }
 
-  def create(repoId: GitHubRepositoryId) = Action.async(parse.json) { implicit req =>
+  def create(owner: String, name: String) = Action.async(parse.json) { implicit req =>
     val newComment = req.body.as[NewComment]
-    commentService.create(repoId, newComment).map(toOkJson(_))
+    commentService.create(GitHubRepositoryId(owner, name), newComment).map(toOkJson(_))
   }
 }
