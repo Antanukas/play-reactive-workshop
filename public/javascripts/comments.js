@@ -1,6 +1,7 @@
 var repositoryId, repoOwner, repoName;
 
 function init() {
+  showUsername();
   repoOwner = $('#repoOwner').text();
   repoName = $('#repoName').text();
   repositoryId = repoOwner + '/' + repoName;
@@ -82,6 +83,16 @@ function getCurrentUser() {
   return JSON.parse(localStorage.getItem("currentUser"));
 }
 
+function showUsername() {
+  var username = getCurrentUser() && getCurrentUser().username;
+  if (username) {
+    $("#username").text(username);
+    $("#username").show();
+  } else {
+    $("#username").hide();
+  }
+}
+
 function login() {
   var username = $('#usernameInput').val();
   var reqBody = {
@@ -95,6 +106,7 @@ function login() {
       function(user) {
         localStorage.setItem('currentUser', JSON.stringify(user));
         adjustFormsVisibility();
+        showUsername();
       }
     );
   }
@@ -103,5 +115,6 @@ function login() {
 function logout() {
   localStorage.removeItem('currentUser');
   adjustFormsVisibility();
+  showUsername();
 }
 init();

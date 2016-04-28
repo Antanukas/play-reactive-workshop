@@ -18,6 +18,7 @@ class UserRepository @Inject() (jdbc: JdbcProfileProvider)(implicit ec: Executio
 
   def insert(username: String): dbio.DBIO[Int] =
     sqlu"""insert into "users"("username") values (${username})"""
+      .flatMap { _ => sql"SELECT LASTVAL()".as[Int].head }
 
   def getById(id: String): dbio.DBIO[Option[User]] =
     sql""" select * from "users" where "id" = ${id}""".as[User].headOption

@@ -20,15 +20,10 @@ class UserService @Inject()(
     userRepository.find(loginRequest.username).flatMap {
       case Some(user) => DBIO.successful(user)
       case None => insertUser(loginRequest.username)
-    }
-    .flatMap(u => userRepository.find(u.username))  // we need to retrieve inserted id separately
-    .flatMap {
-      case Some(user) => DBIO.successful(user)
-      case None => DBIO.failed(new RuntimeException(s"User ${loginRequest.username} login failed"))
     }.transactionally
   }
 
   private def insertUser(username: String): DBIO[User] = {
-    userRepository.insert(username).map(_ => User(UserId(""), username))
+    userRepository.insert(username).map(generatedId => User(UserId(generatedId.toString), username))
   }
 }

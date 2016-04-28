@@ -28,5 +28,6 @@ class CommentsRepository @Inject() (jdbc: JdbcProfileProvider)(implicit ec: Exec
 
   def insert(comment: CommentDbModel): dbio.DBIO[Int] =
     sqlu"""insert into "comments"("user", "repository_owner", "repository_name", "comment") values (${comment.user}, ${comment.repositoryOwner}, ${comment.repositoryName}, ${comment.comment})"""
+      .flatMap { _ => sql"SELECT LASTVAL()".as[Int].head }
 
 }
