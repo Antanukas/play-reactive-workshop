@@ -19,7 +19,7 @@ trait EventPublisher {
   def publish[T <: BusinessEvent](event: T): T
   def subscribe: Source[BusinessEvent, NotUsed]
 
-  def publishUnwrap[RESULT, EVENT <: BusinessEvent](result: PublishableResult[RESULT, EVENT]): RESULT = {
+  def publishEventsAndReturnResult[RESULT, EVENT <: BusinessEvent](result: PublishableResult[RESULT, EVENT]): RESULT = {
     result.events.foreach(publish(_))
     result.result
   }

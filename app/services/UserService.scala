@@ -24,6 +24,6 @@ class UserService @Inject()(
   }
 
   private def insertUser(username: String): DBIO[User] = {
-    userRepository.insert(username).map(generatedId => User(UserId(generatedId.toString), username))
+    userRepository.insert(username).map(generatedId => User(UserId(generatedId), username))
   }
 }

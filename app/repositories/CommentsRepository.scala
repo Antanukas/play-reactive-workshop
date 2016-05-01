@@ -9,25 +9,30 @@ import slick.jdbc.GetResult
 
 import scala.concurrent.ExecutionContext
 
-class CommentsRepository @Inject() (jdbc: JdbcProfileProvider)(implicit ec: ExecutionContext) {
+class CommentsRepository @Inject() (
+  jdbc: JdbcProfileProvider)(implicit ec: ExecutionContext) {
 
   import jdbc.provider.driver.api._
+  import RepositoryResultMappers._
 
-  implicit val userResult = GetResult(r => CommentDbModel(
-    id = r.nextLong,
-    user = r.nextLong,
-    repositoryOwner = r.nextString,
-    repositoryName = r.nextString,
-    comment = r.nextString,
-    createdOn = new DateTime(r.nextDate()),
-    username = r.nextString))
+  def getCommentCount(repository: GitHubRepositoryId): dbio.DBIO[Long] = {
+    sql"""select count(*) from "comments"
+          where "repository_owner" = ${repository.owner} and "repository_name" = ${repository.name} """
+      .as[Long].head
+  }
 
-  def getForRepository(repository: GitHubRepositoryId): dbio.DBIO[Seq[CommentDbModel]] =
-    sql""" select c.*, u."username" from "comments" c join "users" u on c."user" = u."id" where "repository_owner" = ${repository.owner} and "repository_name" = ${repository.name} """
-      .as[CommentDbModel]
+  def getForRepository(repository: GitHubRepositoryId): dbio.DBIO[Seq[(CommentDbModel, User)]] = {
+    sql""" select c.*, u.* from "comments" c join "users" u on c."user" = u."id"
+           where "repository_owner" = ${repository.owner} and "repository_name" = ${repository.name}
+           order by c."created_on" desc """
+      .as[(CommentDbModel, User)]
+  }
 
-  def insert(comment: CommentDbModel): dbio.DBIO[Int] =
-    sqlu"""insert into "comments"("user", "repository_owner", "repository_name", "comment") values (${comment.user}, ${comment.repositoryOwner}, ${comment.repositoryName}, ${comment.comment})"""
+  def insert(comment: CommentDbModel): dbio.DBIO[CommentDbModel] = {
+    sqlu"""insert into "comments"("user", "repository_owner", "repository_name", "comment")
+          values (${comment.user}, ${comment.repositoryOwner}, ${comment.repositoryName}, ${comment.comment})"""
       .flatMap { _ => sql"SELECT LASTVAL()".as[Int].head }
+      .map(id => comment.copy(id = id))
+  }
 
 }

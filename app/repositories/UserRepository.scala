@@ -10,8 +10,7 @@ import scala.concurrent.ExecutionContext
 class UserRepository @Inject() (jdbc: JdbcProfileProvider)(implicit ec: ExecutionContext) {
 
   import jdbc.provider.driver.api._
-
-  implicit val userResult = GetResult(r => User(id = UserId(r.nextLong().toString), username = r.nextString()))
+  import RepositoryResultMappers._
 
   def get(): dbio.DBIO[Seq[User]] =
     sql""" select * from "users" """.as[User]
@@ -20,7 +19,7 @@ class UserRepository @Inject() (jdbc: JdbcProfileProvider)(implicit ec: Executio
     sqlu"""insert into "users"("username") values (${username})"""
       .flatMap { _ => sql"SELECT LASTVAL()".as[Int].head }
 
-  def getById(id: String): dbio.DBIO[Option[User]] =
+  def getById(id: Long): dbio.DBIO[Option[User]] =
     sql""" select * from "users" where "id" = ${id}""".as[User].headOption
 
   def find(username: String): dbio.DBIO[Option[User]] =

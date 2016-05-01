@@ -3,8 +3,8 @@
 # ~~~~
 
 # Pages
-GET     /                           controllers.PagesController.index
-GET     /comments/:owner/:repoName  controllers.PagesController.comments(owner: String, repoName: String)
+GET     /                           pages.PagesController.index
+GET     /comments/:owner/:repoName  pages.PagesController.comments(owner: String, repoName: String)
 
 # Api
 

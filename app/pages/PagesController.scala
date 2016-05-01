@@ -1,10 +1,11 @@
-package controllers
+package pages
 
 import javax.inject._
-import play.api._
+
+import controllers.WebJarAssets
 import play.api.mvc._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class PagesController @Inject()(webJarAssets: WebJarAssets)(implicit ec: ExecutionContext) extends Controller {

@@ -8,9 +8,8 @@ package object models {
   }
 
   //User
-  case class UserId(value: String) extends ModelId[String]
+  case class UserId(value: Long) extends ModelId[Long]
   case class User(id: UserId, username: String)
-
   case class LoginAttempt(username: String)
 
   //Comments
@@ -27,5 +26,11 @@ package object models {
 
   //Repository
   case class GitHubRepositoryId(owner: String, name: String)
-  case class GitRepository(id: GitHubRepositoryId, name: String, fullName: String, commentCount: Int, openIssueCount: BigDecimal, avatarUrl: String)
+  case class GitRepository(
+    id: GitHubRepositoryId,
+    name: String,
+    fullName: String,
+    commentCount: Long,
+    openIssueCount: BigDecimal,
+    avatarUrl: String)
 }

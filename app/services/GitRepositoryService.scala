@@ -10,6 +10,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class GitRepositoryService @Inject()(
       githubClient: GithubClient,
+      commentService: CommentService,
       commentsRepository: CommentsRepository,
       jdbc: JdbcProfileProvider)(implicit ex: ExecutionContext) {
 
@@ -23,31 +24,35 @@ class GitRepositoryService @Inject()(
 //    GitRepository(GitHubRepositoryId("netflix", "hystrix"), "Some repo 3", "tieto/Some repo 3", 44, 34, ""))
 
   def search(query: String): Future[Seq[GitRepository]] = {
-    githubClient.searchRepositories(query)
-      .map(repos => repos.items.map(toGitRepository))
-      .map(repos => DBIO.sequence(repos.map(enrichWithCommentCounts)))
-      .flatMap(db.run(_))
+    githubClient.searchRepositories(query).flatMap { repos =>
+      Future.sequence(repos.items.map(fromGitHubResponse))
+    }
   }
 
   def get(repoId: GitHubRepositoryId): Future[GitRepository] = {
     //TODO retrieve full name from repository and call github api
-    githubClient.getRespository(repoId.owner, repoId.name)
-      .map(toGitRepository)
+    githubClient.getRepository(repoId.owner, repoId.name).flatMap(fromGitHubResponse)
   }
 
-  private def enrichWithCommentCounts(repo: GitRepository): DBIO[GitRepository] = {
-    commentsRepository.getForRepository(repo.id)
-      .map(comments => repo.copy(commentCount = comments.length))
+  private def fromGitHubResponse(githubRepositoryResponse: GithubRepositoryResponse): Future[GitRepository] = {
+    getCommentCount(toGitHubId(githubRepositoryResponse))
+      .map(commentCount => toGitRepository(githubRepositoryResponse, commentCount))
   }
 
-  private def toGitRepository(repo: GithubRepositoryResponse): GitRepository = {
+  private def getCommentCount(gitHubId: GitHubRepositoryId): Future[Long] =
+    db.run(commentsRepository.getCommentCount(gitHubId))
+
+  private def toGitRepository(repo: GithubRepositoryResponse, commentCount: Long): GitRepository = {
     GitRepository(
-      GitHubRepositoryId(repo.owner.login, repo.name),
+      toGitHubId(repo),
       repo.name,
       repo.full_name,
-      0,
+      commentCount,
       repo.open_issues_count,
       repo.owner.avatar_url)
   }
 
+  private def toGitHubId(repo: GithubRepositoryResponse): GitHubRepositoryId = {
+    GitHubRepositoryId(repo.owner.login, repo.name)
+  }
 }
