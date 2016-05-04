@@ -212,7 +212,7 @@ class IntroductionSpec extends FunSuite with Matchers with BeforeAndAfterEach {
     Await.result(eventualTweets, Inf) shouldBe List(Tweet("Spongebob", "My pants are square shaped"))
   }
 
-  test("Flatmap with Option as a result") {  // TODO: maybe move to bottom
+  test("Flatmap with Option as a result") {
     // Try to:
     // 1. retrieve value from cache - `cacheCall`
     //   If value present:

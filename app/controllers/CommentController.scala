@@ -19,7 +19,7 @@ class CommentController @Inject() (commentService: CommentService)
   import controllers.converters.JsonConverters._
 
   def get(owner: String, name: String, currentUserId: Option[Long]) = Action.async { implicit req =>
-    val currentUserIdMapped = currentUserId.map(UserId(_)).getOrElse(UserId(-1))
+    val currentUserIdMapped = currentUserId.map(UserId(_))
     render.async {
       case Accepts.Json() =>
         commentService.getRepositoryComments(GitHubRepositoryId(owner, name))(currentUserIdMapped).map(toOkJson(_))
@@ -33,6 +33,6 @@ class CommentController @Inject() (commentService: CommentService)
 
   def create(owner: String, name: String) = Action.async(parse.json) { implicit req =>
     val newComment = req.body.as[NewComment]
-    commentService.create(GitHubRepositoryId(owner, name), newComment)(newComment.userId).map(toOkJson(_))
+    commentService.create(GitHubRepositoryId(owner, name), newComment)(Some(newComment.userId)).map(toOkJson(_))
   }
 }

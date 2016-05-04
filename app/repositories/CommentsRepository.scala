@@ -25,17 +25,17 @@ class CommentsRepository @Inject() (
       .as[Long].head
   }
 
-  def getCommentIdsByRepositoryId(repository: GitHubRepositoryId): dbio.DBIO[Seq[Long]] = {
+  def getCommentIdsByRepositoryId(repository: GitHubRepositoryId): dbio.DBIO[Seq[CommentId]] = {
     sql""" select c."id" from "comments" c
            where "repository_owner" = ${repository.owner} and "repository_name" = ${repository.name}
            order by c."created_on" desc """
-      .as[Long]
+      .as[CommentId]
   }
 
   def insert(comment: CommentDbModel): dbio.DBIO[CommentDbModel] = {
     sqlu"""insert into "comments"("user", "repository_owner", "repository_name", "comment")
-          values (${comment.user}, ${comment.repositoryOwner}, ${comment.repositoryName}, ${comment.comment})"""
+          values (${comment.user.value}, ${comment.repositoryOwner}, ${comment.repositoryName}, ${comment.comment})"""
       .flatMap { _ => sql"SELECT LASTVAL()".as[Int].head }
-      .map(id => comment.copy(id = id))
+      .map(id => comment.copy(id = CommentId(id)))
   }
 }

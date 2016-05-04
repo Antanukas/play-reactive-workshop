@@ -8,8 +8,7 @@ import models._
 import org.joda.time.DateTime
 import repositories.Models.CommentDbModel
 import repositories.{CommentLikeRepository, CommentsRepository, JdbcProfileProvider, UserRepository}
-import slick.dbio.Effect.All
-import slick.dbio.{DBIO, DBIOAction, NoStream}
+import slick.dbio.DBIO
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -23,24 +22,24 @@ class CommentService @Inject()(
   //Slick implicits for db.run
   import jdbc.provider._
 
-  def getRepositoryComments(repoId: GitHubRepositoryId)(implicit currentUserId: UserId): Future[Seq[Comment]] = db.run {
+  def getRepositoryComments(repoId: GitHubRepositoryId)(implicit currentUserId: Option[UserId]): Future[Seq[Comment]] = db.run {
     commentsRepository.getCommentIdsByRepositoryId(repoId)
-      .map(ids => ids.map(id => getComment(CommentId(id))))
+      .map(ids => ids.map(id => getComment(id)))
       .flatMap(DBIO.sequence(_))
   }
 
-  def create(repoId: GitHubRepositoryId, newComment: NewComment)(implicit currentUserId: UserId): Future[Comment] = db.run {
+  def create(repoId: GitHubRepositoryId, newComment: NewComment)(implicit currentUserId: Option[UserId]): Future[Comment] = db.run {
     commentsRepository.insert(fromNewCommentToDb(repoId, newComment))
-      .flatMap(inserted => getComment(CommentId(inserted.id)))
+      .flatMap(inserted => getComment(inserted.id))
       .map(comment => PublishableResult(comment, NewCommentEvent(repoId, comment.id)))
       .map(eventPublisher.publishEventsAndReturnResult)
   }
 
-  private def getComment(commentId: CommentId)(implicit currentUserId: UserId): DBIO[Comment] = {
+  private def getComment(commentId: CommentId)(implicit currentUserId: Option[UserId]): DBIO[Comment] = {
     for {
       comment <- commentsRepository.getComment(commentId)
       likes <- commentLikeRepository.getLikes(commentId)
-      user <- userRepository.getById(UserId(comment.user))
+      user <- userRepository.getById(comment.user)
     } yield toApiComment(comment, user.get, likes)
   }
 
@@ -48,12 +47,12 @@ class CommentService @Inject()(
     commentDbModel: CommentDbModel,
     user: User,
     //Like functionality
-    commentLikes: Seq[CommentLike] = Seq())(implicit currentUserId: UserId): Comment = {
+    commentLikes: Seq[CommentLike] = Seq())(implicit currentUserId: Option[UserId]): Comment = {
 
-    val isUserLiked = commentLikes.exists(_.userId == currentUserId)
+    val isUserLiked = commentLikes.exists(currentUserId.isDefined && _.userId == currentUserId.get)
     Comment(
-      CommentId(commentDbModel.id),
-      UserId(commentDbModel.user),
+      commentDbModel.id,
+      commentDbModel.user,
       user.username,
       GitHubRepositoryId(commentDbModel.repositoryOwner, commentDbModel.repositoryName),
       commentDbModel.comment,
@@ -64,14 +63,14 @@ class CommentService @Inject()(
 
   private def fromNewCommentToDb(repo: GitHubRepositoryId, newComment: NewComment) = {
     CommentDbModel(
-      user = newComment.userId.value,
+      user = newComment.userId,
       repositoryOwner = repo.owner,
       repositoryName = repo.name,
       comment = newComment.text,
       createdOn = DateTime.now)
   }
 
-  def getRepositoryCommentsSource(repoId: GitHubRepositoryId)(implicit currentUserId: UserId): Source[Seq[Comment], NotUsed] = {
+  def getRepositoryCommentsSource(repoId: GitHubRepositoryId)(implicit currentUserId: Option[UserId]): Source[Seq[Comment], NotUsed] = {
     eventPublisher.subscribe
       .filter {
         case event: NewCommentEvent => event.gitHubId == repoId
