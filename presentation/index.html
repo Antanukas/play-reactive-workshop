@@ -15,15 +15,189 @@
         <small>Antanas and Zygimantas from Tieto Lithuania</small>
     </section>
     <section>
-      1. Reactive Manifesto intro
 
-      2. Writing non blocking code
+      <ul>
+        <li>Reactive Manifesto intro</li>
+        <li>Writing non blocking code</li>
+        <li>Scala Futures</li>
+      </ul>
+    </section>
 
-      4. Short about monads
-      5. Futures what are those
-      6. Few examples how to work with futures
+    <section data-background="img/reactive-manifesto.gif">
+    </section>
+
+    <section>
+      <img src="img/google.png"/>
+    </section>
+    <section>
+      <blockquote>
+        <strong>What?</strong>
+        <p>The Reactive Manifesto is a "bullshit bingo words dictionary", which incorporates distributed system design best practices.</p>
+        <br/>
+        <strong>Why?</strong>
+        <ul>
+          <li>We need to communicate to business executives.</li>
+          <li>We need to talk on their language.</li>
+          <li>We need a bridge built of "bullshit bingo words".</li>
+        </ul>
+      </blockquote>
+      <small style="float: right">Alexey Migutsky</small>
+    </section>
+    <section>
+      <img src="img/spongebob.gif">
+    </section>
+
+    <section>
+      <h2>Now seriously...</h2>
+      <img src="img/serious.gif">
+    </section>
+
+    <section>
+      <h4>Why reactive manifesto was created?</h4>
+
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>10 years ago</th>
+            <th>Now</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Downtime</td>
+            <td>hours</td>
+            <td>none</td>
+          </tr>
+          <tr>
+            <td>Response time</td>
+            <td>seconds</td>
+            <td>milliseconds</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <br/>
+      <br/>
+      <br/>
+      <strong>Changing system requirements</strong>
 
     </section>
+
+    <section>
+      <h3>Reactive manifesto components</h3>
+      <img src="img/reactive-manifesto.png">
+    </section>
+
+    <section>
+      <h3>Responsive</h3>
+      <strong>Systems focus on providing rapid and consistent response times</strong>
+
+      <p>Builds end user confidence and encourages further interactions with system</p>
+    </section>
+
+    <section>
+      <h3>Resilient</h3>
+      <strong>The system stays responsive in the face of failure</strong>
+
+      <p>Parts of the system can fail and recover without compromising the system as a whole</p>
+    </section>
+
+    <section>
+      <h3>Elastic</h3>
+      <strong>The system stays responsive under varying workload</strong>
+
+      <p>Reactive Systems can react to changes in the input rate by increasing or decreasing the resources allocated to service</p>
+        <p>This implies designs that have no central bottlenecks</p>
+    </section>
+
+    <section>
+      <h3>Message Driven</h3>
+      <strong>Communication between components within system is asynchronous.</strong>
+    </section>
+
+    <section>
+      <ul>
+        <li>React to events <strong>(event-driven)</strong></li>
+        <li>React to load <strong>(scalable)</strong></li>
+        <li>React to failures <strong>(resilient)</strong></li>
+        <li>React to users <strong>(responsive)</strong></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Non blocking code</h2>
+    </section>
+
+    <section>
+      <h2>Non blocking code</h2>
+    </section>
+
+    <section>
+      <strong>Some code</strong>
+      <pre>
+
+        val socket = Socket()
+        val packet = socket.readFromMemory()
+        val result = socket.sendPacketToUs(packet)
+
+      </pre>
+    </section>
+
+    <section>
+      <strong>Timing for various operations on typical PC</strong>
+      <img src="img/timing.png">
+    </section>
+
+    <section>
+      <strong>Lets translate this timing into human understandamble terms</strong>
+      <br/>
+      <h2>1 ns  ->  1 s</h2>
+    </section>
+
+    <section>
+      <strong>Timing on human scale</strong>
+      <img src="img/human-scale-timing.png">
+    </section>
+
+    <section>
+      <img src="img/waiting.gif">
+    </section>
+
+    <section>
+      <strong style="font-size: 50px">Non-blocking applications are written in a way that threads never block</strong>
+    </section>
+
+    <section>
+      <strong>Future[T]</strong>
+      <ul>
+        <li>A living object holding a value which may become available at some point</li>
+        <li>Future executes asynchronously without blocking current thread</li>
+        <li>Uses ExecutionContext for concurrent execution </li>
+      </ul>
+    </section>
+
+    <section>
+      <pre>
+        trait Future[T] {
+          def filter(p: T=>Boolean): Future[T]
+          def flatMap[S](f: T=>Future[S]): Future[S]
+          def map[S](f: T=>S): Future[S]
+          def zip[U](that: Future[U]): Future[(T, U)]
+          def recoverWith(f: PartialFunction[Throwable, Future[T]]): Future[T]
+          def recover(pf: PartialFunction[Throwable, U]): Future[T]
+        }
+
+        object Future {
+          def apply[T](body :=>T): Future[T]
+          def successful[T](result: T): Future[T]
+          def failed[T](exception: Throwable): Future[T]
+        }
+
+      </pre>
+
+    </section>
+
   </div>
 </div>
 <script src="js/reveal.min.js"></script>
