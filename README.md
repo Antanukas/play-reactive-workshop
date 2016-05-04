@@ -17,3 +17,37 @@ Optionally specify GITHUB_TOKEN to have bigger req/min threshold
     $ run
 ```
 
+
+# Prepare environment
+
+Tooling needed:
+
+ - Git
+ - Java 8
+ - [IntelliJ  IDEA](https://www.jetbrains.com/idea/download) (community edition is enough)
+ - IntelliJ Scala plugin. By default it is bundled together with IntelliJ, if somehow you don't have it IntelliJ will suggest to install it after you open scala file for the first time
+ - Typesafe Activator. [download link](https://www.lightbend.com/activator/download),
+
+Check if activator installed:
+
+```
+$ activator --version
+```
+
+It would be nice if you try to run and browsing sample scala-play-application to do that follow these instructions: 
+
+```
+$ activator new
+
+... choose play-scala template
+
+Enter a name for your application (just press enter for 'play-scala')
+> hello-scala-play
+
+$ cd hello-scala-play
+$ activator run 
+```
+
+Open page http://localhost:9000
+
+You should see welcome page.
