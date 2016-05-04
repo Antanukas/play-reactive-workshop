@@ -1,9 +1,9 @@
 package repositories
 
 import com.google.inject.Inject
-import models.{User, UserId, GitHubRepositoryId}
+import models._
 import org.joda.time.DateTime
-import repositories.Models.{CommentDbModel}
+import repositories.Models.CommentDbModel
 import slick.dbio
 import slick.jdbc.GetResult
 
@@ -15,17 +15,21 @@ class CommentsRepository @Inject() (
   import jdbc.provider.driver.api._
   import RepositoryResultMappers._
 
+  def getComment(commentId: CommentId): dbio.DBIO[CommentDbModel] = {
+    sql""" select * from "comments" where "id" = ${commentId.value} """.as[CommentDbModel].head
+  }
+
   def getCommentCount(repository: GitHubRepositoryId): dbio.DBIO[Long] = {
     sql"""select count(*) from "comments"
           where "repository_owner" = ${repository.owner} and "repository_name" = ${repository.name} """
       .as[Long].head
   }
 
-  def getForRepository(repository: GitHubRepositoryId): dbio.DBIO[Seq[(CommentDbModel, User)]] = {
-    sql""" select c.*, u.* from "comments" c join "users" u on c."user" = u."id"
+  def getCommentIdsByRepositoryId(repository: GitHubRepositoryId): dbio.DBIO[Seq[Long]] = {
+    sql""" select c."id" from "comments" c
            where "repository_owner" = ${repository.owner} and "repository_name" = ${repository.name}
            order by c."created_on" desc """
-      .as[(CommentDbModel, User)]
+      .as[Long]
   }
 
   def insert(comment: CommentDbModel): dbio.DBIO[CommentDbModel] = {
@@ -34,5 +38,4 @@ class CommentsRepository @Inject() (
       .flatMap { _ => sql"SELECT LASTVAL()".as[Int].head }
       .map(id => comment.copy(id = id))
   }
-
 }

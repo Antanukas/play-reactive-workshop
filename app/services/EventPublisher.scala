@@ -4,6 +4,7 @@ import javax.inject.Inject
 
 import akka.NotUsed
 import akka.stream.scaladsl.Source
+import com.google.inject.Singleton
 import models.BusinessEvent
 import play.api.libs.iteratee.Concurrent
 import play.api.libs.streams.Streams
@@ -28,6 +29,7 @@ trait EventPublisher {
 /**
   * Implementation using {{{Concurrent.broadcast}}}
   */
+@Singleton
 class ConcurrentBroadcastEventPublisher @Inject()() extends EventPublisher {
 
   val (eventsOut, eventsChannel) = Concurrent.broadcast[BusinessEvent]

@@ -1,6 +1,6 @@
 package repositories
 
-import models.{User, UserId}
+import models.{CommentId, CommentLike, User, UserId}
 import org.joda.time.DateTime
 import repositories.Models.CommentDbModel
 import slick.jdbc.GetResult
@@ -19,4 +19,7 @@ object RepositoryResultMappers {
 
   implicit val commentsWithUserResult = GetResult(r =>
     (commentResult(r), userResult(r)))
+
+  implicit val commentLikeResult = GetResult(r => CommentLike(
+    r.nextLong(), CommentId(r.nextLong()), UserId(r.nextLong())))
 }

@@ -12,7 +12,7 @@ object Models {
   case class GithubRepositoriesResponse(items: Seq[GithubRepositoryResponse])
 }
 
-object Converters {
+object JsonConverters {
 
   implicit val githubRepositoryOwnerRead = Json.reads[GithubRepositoryOwner]
   implicit val githubRepositoryResponseRead = Json.reads[GithubRepositoryResponse]

@@ -16,13 +16,14 @@ function init() {
       $('#repositoryName').text(repository.name);
       $('#repositoryIssueCount').text(repository.openIssueCount);
     });
+  var currentUserParam = getCurrentUser() ? '?currentUserId=' + getCurrentUser().id : '';
   window.prw.apiCall("GET",
-    '/api/repositories/' + repositoryId + '/comments',
+    '/api/repositories/' + repositoryId + '/comments' + currentUserParam,
     null,
     function(comments) {
       updateCommentsList(comments);
       //Register SSE listener
-      var commentSource = new EventSource('/api/repositories/' + repositoryId + '/comments');
+      var commentSource = new EventSource('/api/repositories/' + repositoryId + '/comments' + currentUserParam);
       commentSource.onmessage = function(event) {
         var responseJson = JSON.parse(event.data);
         updateCommentsList(responseJson);
@@ -62,17 +63,35 @@ function postMessage() {
 
 function updateCommentsList(comments) {
   $('#commentCount').text(comments.length);
-  var renderedComments = comments.map(function(comment){
-    return '<div class="media">' +
-          '<p class="pull-right"><small>' + formatDate(new Date(comment.createdOn)) + '</small></p>' +
-          '<div class="media-body">' +
-            '<h4 class="media-heading user_name">' + comment.username + '</h4>' +
-            '<p>' + comment.text + '</p>' +
-          '</div>' +
-        '</div>' +
-       '</div>';
+  var renderedComponents = comments.map(function(comment) {
+    var isLikeVisible = getCurrentUser() && !comment.isUserLiked;
+    return '' +
+      '<div class="media">' +
+      '  <p class="pull-right"><small>' + formatDate(new Date(comment.createdOn)) + '</small></p>' +
+      '  <p class="pull-right">' +
+      '    <span class="glyphicon glyphicon-thumbs-up"></span><span> ('+ comment.likeCount +')</span>' +
+      '  </p>' +
+      (isLikeVisible ? '<p class="pull-right"><a class="pull-right" onclick="like('+ comment.id +')"> Like</a></p>' : '') +
+      '  <div class="media-body">' +
+      '    <h4 class="media-heading user_name">' + comment.username + '</h4>' +
+      '    <p>' + comment.text + '</p>' +
+      '  </div>' +
+      '  </div>' +
+      '</div>';
   });
-  $('.comments-list').html(renderedComments);
+  $('.comments-list').html(renderedComponents);
+}
+
+function like(commentId) {
+    window.prw.apiCall(
+      "POST",
+      '/api/comments/' + commentId + '/likes',
+      {
+        userId: getCurrentUser().id,
+        commentId: '' + commentId
+      },
+      function() {});
+    return false;
 }
 
 function formatDate(date)  {
@@ -110,11 +129,13 @@ function login() {
       }
     );
   }
+  location.reload();
 }
 
 function logout() {
   localStorage.removeItem('currentUser');
   adjustFormsVisibility();
   showUsername();
+  location.reload();
 }
 init();

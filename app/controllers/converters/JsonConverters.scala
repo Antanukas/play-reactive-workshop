@@ -16,6 +16,9 @@ object JsonConverters {
   implicit val commentFormat = Json.format[Comment]
   implicit val newCommentFormat = Json.format[NewComment]
 
+  implicit val newCommentLikeFormat = Json.format[NewCommentLike]
+  implicit val commentLikeFormat = Json.format[CommentLike]
+
   def idReads[T](constructor: String => T): Reads[T] = new Reads[T] {
     override def reads(json: JsValue): JsResult[T] = json match {
       case JsString(s) => JsSuccess(constructor(s))

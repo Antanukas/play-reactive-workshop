@@ -1,29 +1,76 @@
 
-import org.scalatest.{BeforeAndAfterEach, FreeSpec, Matchers, FlatSpec}
-
-import scala.Int
-import scala.concurrent.duration.Duration.Inf
-import scala.concurrent.{Await, Future}
-
+import org.scalatest._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.{Success, Failure}
+import scala.concurrent.duration.Duration.Inf
+import scala.concurrent.{Await, Future}
+import scala.util.{Failure, Success}
 
-class IntroductionSpec extends FreeSpec with Matchers with BeforeAndAfterEach {
+class IntroductionSpec extends FunSuite with Matchers with BeforeAndAfterEach {
 
-  override def afterEach {
-    ANGRY_CACHE_FAILS = true
-    CACHE_RETURNS_VALUE = false
+  test("Syntax") {
+
+    case class ExampleCaseClass(fieldOfTypeString: String)
+    //When creating instance of case class no new keyword is needed
+    val instanceOfCaseClass = ExampleCaseClass("Parameter which is a String")
+    instanceOfCaseClass.fieldOfTypeString shouldBe "Parameter which is a String"
+
+    class SimpleClassLikeInJava(val immutableField: String, var mutableField: String) {
+      def aMethodZWhichAddsZZZ(param: String): String = {
+        param + "ZZZ"
+      }
+    }
+    object SimpleClassLikeInJava { //Called Companion object. Imagine a holder of static methods
+      def aStaticMethodZWhichAddsZZZ(param: String): String = {
+        param + "ZZZ"
+      }
+    }
+    val instanceOfSimpleClass = new SimpleClassLikeInJava("immutable", "mutable")
+    instanceOfSimpleClass.mutableField = "new mutable value"
+    //instanceOfSimpleClass.immutableField = "z" //Don't try this
+    instanceOfSimpleClass.mutableField shouldBe "new mutable value"
+    instanceOfSimpleClass.aMethodZWhichAddsZZZ("smth") shouldBe "smthZZZ"
+    SimpleClassLikeInJava.aStaticMethodZWhichAddsZZZ("smth") shouldBe "smthZZZ"
+
+
+    //Destructuring
+    val (pairItem1, pairItem2) = ("Pair item 1 value", "Pair item 2 value")
+    pairItem1 shouldBe "Pair item 1 value"
+    pairItem2 shouldBe "Pair item 2 value"
+    //Quadruple
+    val (a1, b1, c1, d1) = ("a", "b", "c", "d")
+    // _ means whatewa
+    val (a2, _, _, d2, e2, f2 ,g2) = ("a", "b", "c", "d", "e", "f", "g")
+
+    //Collections
+    val aList = List(1, 2 ,3)
+    val aVector = Vector(1, 2, 3)
+    val aMap = Map("key" -> 1, "key2" -> 2)
+
+    //Lambdas, anonymous functions, etc.
+    val anonymousFunction: (String, String) => String = (a, b) => a + b
+    anonymousFunction("This is ", "Tieto Networking Conference") shouldBe "This is Tieto Networking Conference"
+
+    //Higher order functions
+    List(1, 2 ,3).map(number => number * 2) shouldBe List(2, 4, 6)
+    List(1, 2, 3).flatMap(number => List(number * 2)) shouldBe List(2, 4, 6)
+    List(1, 2, 3).filter(number => number % 2 == 0) shouldBe List(2)
+    List("a", "b", "c").map(SimpleClassLikeInJava.aStaticMethodZWhichAddsZZZ)
+
+    //List of pairs with destructuring
+    List(("Pair1Item1", "Pair1Item2"), ("Pair2Item1","Pair2Item2")).map {
+      case (item1, item2) => (item2, item1)
+    } shouldBe List(("Pair1Item2", "Pair1Item1"), ("Pair2Item2","Pair2Item1"))
+    //Or same with pair._1, pair._2
+    List(("Pair1Item1", "Pair1Item2"), ("Pair2Item1","Pair2Item2"))
+      .map(pair => (pair._2, pair._1)) shouldBe List(("Pair1Item2", "Pair1Item1"), ("Pair2Item2","Pair2Item1"))
+
   }
 
-  // TODO: consider replace FlatSpec to something more suitable
-
   case class User(userId: Long, username: String, twitterName: String)
-
   case class Tweet(name: String, message: String)
 
-
-  "Future that returns String should be created " in {
+  test("Future that returns String 'Simple Future' should be created ") {
     val future: Future[String] = Future {
       "Simple Future"
     }
@@ -31,7 +78,7 @@ class IntroductionSpec extends FreeSpec with Matchers with BeforeAndAfterEach {
     Await.result(future, Inf) shouldBe "Simple Future"
   }
 
-  "Future that returns `Tweet` case class instance should be created " in {
+  test("Future that returns `Tweet` case class instance should be created ") {
     val future = Future {
       Tweet("1", "What a great conference!")
     }
@@ -39,7 +86,7 @@ class IntroductionSpec extends FreeSpec with Matchers with BeforeAndAfterEach {
     Await.result(future, Inf) shouldBe Tweet("1", "What a great conference!")
   }
 
-  "Future with failed execution should be created " in {
+  test("Future with failed execution should be created ") {
     val future = Future.failed(new RuntimeException("Something bad"))
 //    val future =  Future {
 //      throw new RuntimeException("Error...")
@@ -51,7 +98,7 @@ class IntroductionSpec extends FreeSpec with Matchers with BeforeAndAfterEach {
     }
   }
 
-  "Future tweet should be mapped to string message" in {
+  test("Future tweet should be mapped to string message") {
     val tweet = Future.successful(Tweet("Homer", "Nice conference indeed!"))
 
     val message = tweet.map(t => s"${t.name}: ${t.message}")
@@ -59,7 +106,7 @@ class IntroductionSpec extends FreeSpec with Matchers with BeforeAndAfterEach {
     Await.result(message, Inf) shouldBe "Homer: Nice conference indeed!"
   }
 
-  "Future holding list of strings should be mapped to strings length " in {
+  test("Future holding list of strings should be mapped to strings length ") {
     val tweetFuture = Future {
       List("You", "should", "map", "this", "to", "")
     }
@@ -69,8 +116,29 @@ class IntroductionSpec extends FreeSpec with Matchers with BeforeAndAfterEach {
     Await.result(tweetLengths, Inf) shouldBe List(3, 6, 3, 4, 2, 0)
   }
 
+  test("Composition of multiple independent Futures") {
+    val myNamePattern = Future { "My name is %s" }
+    val name = Future { "Antanas" }
 
-  "Future  should  fail if filter condition fails " in {
+    val result = myNamePattern.zip(name).map {
+      case (pattern, name) => String.format(pattern, name)
+    }
+
+    Await.result(result, Inf) shouldBe "My name is Antanas"
+  }
+
+
+  test("Composition of multiple dependent futures") {
+    val someStringProducingFuture = Future { "Some totally random str" }
+    val stringLengthCalculatingFuture = (str: String) => Future { str.length }
+
+    val lengthOfAString = someStringProducingFuture.flatMap(
+      aString => stringLengthCalculatingFuture(aString))
+
+    Await.result(lengthOfAString, Inf) shouldBe 23
+  }
+
+  test("Future should fail if filter condition fails ") {
     val emptyTweet = Future.successful(Tweet("Homer", ""))
 
     val emptyTweetFutureFailed = emptyTweet.filter(t => !t.message.isEmpty)
@@ -81,7 +149,7 @@ class IntroductionSpec extends FreeSpec with Matchers with BeforeAndAfterEach {
     }
   }
 
-  "Future  should  return same value if filter succeed " in {
+  test("Future should return same value if filter succeed ") {
     val tweet = Future.successful(Tweet("Homer", "Nice conference indeed!"))
 
     val notEmptyTweetFuture = tweet.filter(t => !t.message.isEmpty)
@@ -92,7 +160,9 @@ class IntroductionSpec extends FreeSpec with Matchers with BeforeAndAfterEach {
     }
   }
 
-
+  override def afterEach {
+    CACHE_RETURNS_VALUE = false
+  }
 
   /**
    * Pretend that this function is call to cache
@@ -122,16 +192,17 @@ class IntroductionSpec extends FreeSpec with Matchers with BeforeAndAfterEach {
     List(Tweet("Spongebob", "My pants are square shaped"))
   }
 
-  "Combine two futures with flatMap" in {
+  test("Combine two futures with flatMap") {
     // First dbCall should be resolved and only then apiCall can be performed since it need data from dbCall
 
+    //perform dbCall and the using its result - apiCall
     val tweetsFuture = dbCall(123)
         .flatMap(user => apiCall(user.username))
 
     Await.result(tweetsFuture, Inf) shouldBe List(Tweet("Spongebob", "My pants are square shaped"))
   }
 
-  "Same flatmap should be written using for comprehension " in {
+  test("Same flatmap should be written using for comprehension ") {
 
     val eventualTweets = for {
       db <- dbCall(123)
@@ -141,7 +212,7 @@ class IntroductionSpec extends FreeSpec with Matchers with BeforeAndAfterEach {
     Await.result(eventualTweets, Inf) shouldBe List(Tweet("Spongebob", "My pants are square shaped"))
   }
 
-  "Flatmap more complex example" in {  // TODO: maybe move to bottom
+  test("Flatmap with Option as a result") {  // TODO: maybe move to bottom
     // Try to:
     // 1. retrieve value from cache - `cacheCall`
     //   If value present:
@@ -151,102 +222,16 @@ class IntroductionSpec extends FreeSpec with Matchers with BeforeAndAfterEach {
     //      - do apiCall
     //
 
-    val result = cacheCall(123).flatMap {
-      case Some(user) => apiCall(user.username)
-      case None => dbCall(123).flatMap(user => apiCall(user.username))
+    val result = cacheCall(123).flatMap { userOption =>
+      if (userOption.isEmpty) {
+        dbCall(123).flatMap(user => apiCall(user.username))
+      } else {
+        apiCall(userOption.get.username)
+      }
     }
 
     // Try to write it with for comprehension
 
     Await.result(result, Inf) shouldBe List(Tweet("Spongebob", "My pants are square shaped"))
   }
-
-  "Two futures should be zipped together" in {
-    // If calls are independent from one another we can use zip function to work with two futures result
-    // When zipping Future[T1] and Future[T2] zip result is Future[(T1, T2)].
-
-    val zipped = dbCall(123).zip(dbCall(321))
-
-    Await.result(zipped, Inf) shouldBe (User(123, "Spongebob", "@Sponge"), User(321, "Spongebob", "@Sponge"))
-  }
-
-  "Two futures should be zipped and mapped together" in {
-    // Try zip two api calls and map zipped future to Future[Int] where Int represents number of total tweets
-
-    val homerTweets = apiCall("Homer")
-    val spongeBobTweets = apiCall("Spongebob")
-
-    val tweetsCountFuture = homerTweets.zip(spongeBobTweets)
-        .map { case (t1, t2) => t1.length + t2.length}
-
-    Await.result(tweetsCountFuture, Inf) shouldBe 2
-  }
-
-
-  var ANGRY_CACHE_FAILS = true
-  def angryCacheCall(userId: Long): Future[Option[User]] = {
-    if (ANGRY_CACHE_FAILS) Future.failed(new RuntimeException("Value unavailable"))
-    else Future(Option(User(1, "Stewie Griffin", "@Stewie")))
-  }
-
-  "If future fails we should recover default value" in {
-    // use angry cache to retrieve user, if it fails return default user
-    val defaultUser = User(1, "Homer", "@Homer")
-
-    val recoverFuture = angryCacheCall(123).recover {
-      case e: IllegalArgumentException => User(1, "Me", "Me")
-      case e: RuntimeException => defaultUser
-    }
-
-    Await.ready(recoverFuture, Inf).onComplete {
-      case Failure(_) => fail("Future should recover from RuntimeException")
-      case Success(user) =>  user shouldBe defaultUser
-    }
-  }
-
-  "If future fails we should recover with another call to cache" in {
-    // use angry cache to retrieve user, if it fails return try to call another cache, which is not so angry `cacheCall`
-    // if `cacheCall` returns empty then return default user.
-    val defaultUser = User(1, "Homer", "@Homer")
-
-    def recoverFuture = angryCacheCall(123).recoverWith {
-      case e: RuntimeException => cacheCall(123)
-    }.map {
-      case Some(u) => u
-      case None => defaultUser
-    }
-
-    // this could be omplemented with fallbackTo as well
-
-    ANGRY_CACHE_FAILS = true
-    CACHE_RETURNS_VALUE = false
-    // both cache calls have no value present
-    Await.result(recoverFuture, Inf).username shouldBe "Homer"
-
-    ANGRY_CACHE_FAILS = false
-    CACHE_RETURNS_VALUE = false
-    // angry cache returns correct value
-    Await.result(recoverFuture, Inf).username shouldBe "Stewie Griffin"
-
-    ANGRY_CACHE_FAILS = true
-    CACHE_RETURNS_VALUE = true
-    // angry cache returns correct value
-    Await.result(recoverFuture, Inf).username shouldBe "Spongebob"
-  }
-
-
-
-  // from list of futures make future[list[t]]
-
-  // resilience
-
-
-  //    spongeBobTweets.onSuccess {
-  //      case l => println(l)
-  //    }
-  //
-  //    spongeBobTweets.onFailure {
-  //      case throwble => println(throwble) // Send error report to ops
-  //    }
-
-}
+ }

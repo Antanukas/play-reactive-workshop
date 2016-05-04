@@ -11,13 +11,19 @@ GET     /comments/:owner/:repoName  pages.PagesController.comments(owner: String
 # Users
 POST    /api/users/actions/login    controllers.UserController.login
 
-# Github repositories
+# GitHub repositories
 GET     /api/repositories               controllers.GitRepositoryController.search(search)
 GET     /api/repositories/:owner/:name  controllers.GitRepositoryController.get(owner: String, name: String)
 
-# Github repository comments
-GET     /api/repositories/:owner/:name/comments controllers.CommentController.get(owner: String, name: String)
+# GitHub repository comments
+GET     /api/repositories/:owner/:name/comments controllers.CommentController.get(owner: String, name: String, currentUserId: Option[Long])
 POST    /api/repositories/:owner/:name/comments controllers.CommentController.create(owner: String, name: String)
+
+# GitHub comment likes
+
+#TODO why pathbindable doesnt work?
+GET     /api/comments/:commentId/likes controllers.CommentLikeController.getLikes(commentId: Long)
+POST    /api/comments/:commentId/likes controllers.CommentLikeController.like(commentId: Long)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

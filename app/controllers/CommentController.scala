@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
-import models.{GitHubRepositoryId, NewComment}
+import models._
 import play.api.http.{ContentTypes, MimeTypes}
 import play.api.libs.EventSource
 import play.api.libs.json.Json
@@ -18,18 +18,21 @@ class CommentController @Inject() (commentService: CommentService)
 
   import controllers.converters.JsonConverters._
 
-  def get(owner: String, name: String) = Action.async { implicit req =>
+  def get(owner: String, name: String, currentUserId: Option[Long]) = Action.async { implicit req =>
+    val currentUserIdMapped = currentUserId.map(UserId(_)).getOrElse(UserId(-1))
     render.async {
       case Accepts.Json() =>
-        commentService.getRepositoryComments(GitHubRepositoryId(owner, name)).map(toOkJson(_))
+        commentService.getRepositoryComments(GitHubRepositoryId(owner, name))(currentUserIdMapped).map(toOkJson(_))
       case EventStreamAccept() =>
-        val source = commentService.getRepositoryCommentsSource(GitHubRepositoryId(owner, name)).map(Json.toJson(_))
+        val source = commentService
+          .getRepositoryCommentsSource(GitHubRepositoryId(owner, name))(currentUserIdMapped)
+          .map(Json.toJson(_))
         Future(Ok.chunked(source via EventSource.flow).as(ContentTypes.EVENT_STREAM))
     }
   }
 
   def create(owner: String, name: String) = Action.async(parse.json) { implicit req =>
     val newComment = req.body.as[NewComment]
-    commentService.create(GitHubRepositoryId(owner, name), newComment).map(toOkJson(_))
+    commentService.create(GitHubRepositoryId(owner, name), newComment)(newComment.userId).map(toOkJson(_))
   }
 }

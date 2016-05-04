@@ -21,8 +21,16 @@ package object models {
     username: String,
     gitHubId: GitHubRepositoryId,
     text: String,
-    createdOn: DateTime = DateTime.now)
+    createdOn: DateTime = DateTime.now,
+    //Should be implemented using likes
+    isUserLiked: Boolean = false,
+    likeCount: Int = 0)
   case class NewCommentEvent(gitHubId: GitHubRepositoryId, commentId: CommentId) extends BusinessEvent
+
+  //Likes
+  case class NewCommentLikeEvent(gitHubId: GitHubRepositoryId, commentId: CommentId) extends BusinessEvent
+  case class NewCommentLike(commentId: CommentId, userId: UserId)
+  case class CommentLike(id: Long = -1, commentId: CommentId, userId: UserId)
 
   //Repository
   case class GitHubRepositoryId(owner: String, name: String)

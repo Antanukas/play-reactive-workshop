@@ -18,11 +18,6 @@ class GitRepositoryService @Inject()(
   import jdbc.provider._
   import jdbc.provider.driver.api._
 
-//  val data: Seq[GitRepository] = Seq(
-//    GitRepository(GitHubRepositoryId("play", "play"), "Some repo", "Antanukas/Some repo", 5, 55, ""),
-//    GitRepository(GitHubRepositoryId("spring", "spring"), "Some repo 2", "tieto/Some repo 2", 21, 67, ""),
-//    GitRepository(GitHubRepositoryId("netflix", "hystrix"), "Some repo 3", "tieto/Some repo 3", 44, 34, ""))
-
   def search(query: String): Future[Seq[GitRepository]] = {
     githubClient.searchRepositories(query).flatMap { repos =>
       Future.sequence(repos.items.map(fromGitHubResponse))
@@ -34,9 +29,9 @@ class GitRepositoryService @Inject()(
     githubClient.getRepository(repoId.owner, repoId.name).flatMap(fromGitHubResponse)
   }
 
-  private def fromGitHubResponse(githubRepositoryResponse: GithubRepositoryResponse): Future[GitRepository] = {
-    getCommentCount(toGitHubId(githubRepositoryResponse))
-      .map(commentCount => toGitRepository(githubRepositoryResponse, commentCount))
+  private def fromGitHubResponse(gitHubRepositoryResponse: GithubRepositoryResponse): Future[GitRepository] = {
+    getCommentCount(toGitHubId(gitHubRepositoryResponse))
+      .map(commentCount => toGitRepository(gitHubRepositoryResponse, commentCount))
   }
 
   private def getCommentCount(gitHubId: GitHubRepositoryId): Future[Long] =

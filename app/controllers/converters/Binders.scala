@@ -1,6 +1,6 @@
 package controllers.converters
 
-import models.{CommentId, GitHubRepositoryId, UserId}
+import models.{CommentId, UserId}
 import play.api.mvc.PathBindable
 
 object Binders {

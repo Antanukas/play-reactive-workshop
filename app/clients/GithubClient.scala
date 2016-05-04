@@ -6,7 +6,7 @@ import play.Configuration
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
-import clients.Converters.{githubRepositoriesResponseRead, githubRepositoryOwnerRead, githubRepositoryResponseRead}
+import clients.JsonConverters.{githubRepositoriesResponseRead, githubRepositoryOwnerRead, githubRepositoryResponseRead}
 
 
 class GithubClient @Inject()(val ws: WSClient, val configuration: Configuration)(implicit ex: ExecutionContext) {
