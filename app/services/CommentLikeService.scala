@@ -26,25 +26,18 @@ class CommentLikeService @Inject()(
    * 2. implement getGitHubRepositoryIdByCommentId by commentID
    * 3. Publish NewCommentLikeEvent
    */
-    commentLikeRepository
-      .insert(CommentLike(commentId = newCommentLike.commentId, userId = newCommentLike.userId))
-      .zip(getGitHubRepositoryIdByCommentId(newCommentLike.commentId))
-      .map { case (commentLike, gitHubRepositoryId) =>
-        publishEvent(commentLike, gitHubRepositoryId)
-      }
+    ???
   }
 
   def getLikes(commentId: CommentId): Future[Seq[CommentLike]] = db.run {
-    commentLikeRepository.getLikes(commentId)
+    ???
   }
 
   private def getGitHubRepositoryIdByCommentId(commentId: CommentId): DBIO[GitHubRepositoryId] = {
-    commentRepository.getComment(commentId)
-      .map(comment => GitHubRepositoryId(comment.repositoryOwner, comment.repositoryName))
+    ???
   }
 
   private def publishEvent(commentLike: CommentLike, gitHubRepositoryId: GitHubRepositoryId): CommentLike = {
-    eventPublisher.publish(NewCommentLikeEvent(gitHubRepositoryId, commentLike.commentId))
-    commentLike
+    ???
   }
 }

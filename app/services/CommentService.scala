@@ -77,15 +77,9 @@ class CommentService @Inject()(
      * 2. Then using its result use userRepository.getById
      * 3. finally use toApiComment(comment, user) to get final result
      */
-    val withoutLikesImplementation: DBIO[Comment] = commentsRepository.getComment(commentId)
+    commentsRepository.getComment(commentId)
       .flatMap(comment => userRepository.getById(comment.user)
         .map(user => toApiComment(comment, user.get)))
-
-    for {
-      comment <- commentsRepository.getComment(commentId)
-      likes <- commentLikeRepository.getLikes(commentId)
-      user <- userRepository.getById(comment.user)
-    } yield toApiComment(comment, user.get, likes)
   }
 
   private def publishEvent(comment: Comment): Comment = {
