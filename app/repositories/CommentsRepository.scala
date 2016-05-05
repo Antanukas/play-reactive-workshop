@@ -26,6 +26,14 @@ class CommentsRepository @Inject() (
   }
 
   def getCommentIdsByRepositoryId(repository: GitHubRepositoryId): dbio.DBIO[Seq[CommentId]] = {
+    /*
+     * Task: Get comment list
+     *
+     * 1. Write a SQL query to get all comment ids by repository id
+     * 2. Check 2.sql file to see how comments table look.
+     *    You should be interested in repository_owner and repository_name
+     * 3. Checkout other queries for examples
+     */
     sql""" select c."id" from "comments" c
            where "repository_owner" = ${repository.owner} and "repository_name" = ${repository.name}
            order by c."created_on" desc """

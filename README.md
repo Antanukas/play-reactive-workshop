@@ -26,7 +26,7 @@ Tooling needed:
  - Java 8
  - [IntelliJ  IDEA](https://www.jetbrains.com/idea/download) (community edition is enough)
  - IntelliJ Scala plugin. By default it is bundled together with IntelliJ, if somehow you don't have it IntelliJ will suggest to install it after you open scala file for the first time
- - Typesafe Activator. [download link](https://www.lightbend.com/activator/download),
+ - Lightbend Activator. [download link](https://www.lightbend.com/activator/download),
 
 Check if activator installed:
 
@@ -55,6 +55,9 @@ You should see welcome page.
 # Tasks
  Should be performed in this order. Search in code for string `Task: taskName`
  
+ - Task: Intro using IntroductionSpec
  - Task: Search
  - Task: Display repository information
  - Task: Create Comment
+ - Task: Get comment list
+ - Task: Comment Like

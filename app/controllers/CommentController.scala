@@ -19,6 +19,11 @@ class CommentController @Inject() (commentService: CommentService)
   import controllers.converters.JsonConverters._
 
   def get(owner: String, name: String, currentUserId: Option[Long]) = Action.async { implicit req =>
+    /*
+     * Task: Get comment list
+     *
+     * Implement commentService.getRepositoryComments
+     */
     val currentUserIdMapped = currentUserId.map(UserId(_))
     render.async {
       case Accepts.Json() =>

@@ -24,9 +24,24 @@ class CommentService @Inject()(
 
   def getRepositoryComments(repoId: GitHubRepositoryId)
     (implicit currentUserId: Option[UserId]): Future[Seq[Comment]] = db.run {
-    commentsRepository.getCommentIdsByRepositoryId(repoId)
-      .map(ids => ids.map(id => getComment(id)))
-      .flatMap(DBIO.sequence(_))
+    /*
+     * Task: Get comment list
+     *
+     * 1. Implement commentsRepository.getCommentIdsByRepositoryId
+     * 2. Implement getCommentsByIds
+     * 3. Combine getCommentIdsByRepositoryId and getCommentsByIds to get Seq[Comment]
+     */
+    commentsRepository.getCommentIdsByRepositoryId(repoId).flatMap(getCommentsByIds)
+  }
+
+  private def getCommentsByIds(ids: Seq[CommentId])(implicit currentUserId: Option[UserId]): DBIO[Seq[Comment]] = {
+    /*
+     * Task: Get comment list
+     *
+     * 1. Use already implemented getComment
+     * 2. Remember Future.sequence? DBIO.sequence does the same
+     */
+    DBIO.sequence(ids.map(id => getComment(id)))
   }
 
   def create(repoId: GitHubRepositoryId, newComment: NewComment)
@@ -62,7 +77,7 @@ class CommentService @Inject()(
      * 2. Then using its result use userRepository.getById
      * 3. finally use toApiComment(comment, user) to get final result
      */
-    val a: DBIO[Comment] = commentsRepository.getComment(commentId)
+    val withoutLikesImplementation: DBIO[Comment] = commentsRepository.getComment(commentId)
       .flatMap(comment => userRepository.getById(comment.user)
         .map(user => toApiComment(comment, user.get)))
 

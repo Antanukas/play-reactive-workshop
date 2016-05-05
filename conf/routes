@@ -20,8 +20,6 @@ GET     /api/repositories/:owner/:name/comments controllers.CommentController.ge
 POST    /api/repositories/:owner/:name/comments controllers.CommentController.create(owner: String, name: String)
 
 # GitHub comment likes
-
-#TODO why pathbindable doesnt work?
 GET     /api/comments/:commentId/likes controllers.CommentLikeController.getLikes(commentId: Long)
 POST    /api/comments/:commentId/likes controllers.CommentLikeController.like(commentId: Long)
 
