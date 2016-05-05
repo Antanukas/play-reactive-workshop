@@ -31,7 +31,7 @@ class CommentService @Inject()(
      * 2. Implement getCommentsByIds
      * 3. Combine getCommentIdsByRepositoryId and getCommentsByIds to get Seq[Comment]
      */
-    commentsRepository.getCommentIdsByRepositoryId(repoId).flatMap(getCommentsByIds)
+    ???
   }
 
   private def getCommentsByIds(ids: Seq[CommentId])(implicit currentUserId: Option[UserId]): DBIO[Seq[Comment]] = {
@@ -41,7 +41,7 @@ class CommentService @Inject()(
      * 1. Use already implemented getComment
      * 2. Remember Future.sequence? DBIO.sequence does the same
      */
-    DBIO.sequence(ids.map(id => getComment(id)))
+    ???
   }
 
   def create(repoId: GitHubRepositoryId, newComment: NewComment)

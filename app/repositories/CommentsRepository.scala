@@ -34,10 +34,7 @@ class CommentsRepository @Inject() (
      *    You should be interested in repository_owner and repository_name
      * 3. Checkout other queries for examples
      */
-    sql""" select c."id" from "comments" c
-           where "repository_owner" = ${repository.owner} and "repository_name" = ${repository.name}
-           order by c."created_on" desc """
-      .as[CommentId]
+    ???
   }
 
   def insert(comment: CommentDbModel): dbio.DBIO[CommentDbModel] = {
