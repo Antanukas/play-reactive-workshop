@@ -12,26 +12,19 @@ class IntroductionSpec extends FunSuite with Matchers with BeforeAndAfterEach {
   case class Tweet(name: String, message: String)
 
   test("Future that returns String 'Simple Future' should be created ") {
-    val future: Future[String] = Future {
-      "Simple Future"
-    }
+    val future: Future[String] = ???
 
     Await.result(future, Inf) shouldBe "Simple Future"
   }
 
   test("Future that returns `Tweet` case class instance should be created ") {
-    val future = Future {
-      Tweet("1", "What a great conference!")
-    }
+    val future: Future[Tweet] = ???
 
     Await.result(future, Inf) shouldBe Tweet("1", "What a great conference!")
   }
 
   test("Future with failed execution should be created ") {
-    val future = Future.failed(new RuntimeException("Something bad"))
-//    val future =  Future {
-//      throw new RuntimeException("Error...")
-//    }
+    val future: Future[Any] = ???
 
     Await.ready(future, Inf).onComplete {
       case Failure(e) => e shouldBe a [RuntimeException]
@@ -42,7 +35,7 @@ class IntroductionSpec extends FunSuite with Matchers with BeforeAndAfterEach {
   test("Future tweet should be mapped to string message") {
     val tweet = Future.successful(Tweet("Homer", "Nice conference indeed!"))
 
-    val message = tweet.map(t => s"${t.name}: ${t.message}")
+    val message: Future[String] = ???
 
     Await.result(message, Inf) shouldBe "Homer: Nice conference indeed!"
   }
@@ -52,7 +45,7 @@ class IntroductionSpec extends FunSuite with Matchers with BeforeAndAfterEach {
       List("You", "should", "map", "this", "to", "")
     }
 
-    val tweetLengths = tweetFuture.map(tweets => tweets.map(tweet => tweet.length))
+    val tweetLengths: Future[List[Int]] = ???
 
     Await.result(tweetLengths, Inf) shouldBe List(3, 6, 3, 4, 2, 0)
   }
@@ -61,9 +54,7 @@ class IntroductionSpec extends FunSuite with Matchers with BeforeAndAfterEach {
     val myNamePattern = Future { "This conference is called %s" }
     val name = Future { "Tieto Networking Conference" }
 
-    val result = myNamePattern.zip(name).map {
-      case (pattern, name) => String.format(pattern, name)
-    }
+    val result: Future[String] = ???
 
     Await.result(result, Inf) shouldBe "This conference is called Tieto Networking Conference"
   }
@@ -73,8 +64,7 @@ class IntroductionSpec extends FunSuite with Matchers with BeforeAndAfterEach {
     val someStringProducingFuture = Future { "Some totally random str" }
     val stringLengthCalculatingFuture = (str: String) => Future { str.length }
 
-    val lengthOfAString = someStringProducingFuture.flatMap(
-      aString => stringLengthCalculatingFuture(aString))
+    val lengthOfAString: Future[Int] = ???
 
     Await.result(lengthOfAString, Inf) shouldBe 23
   }
@@ -82,7 +72,7 @@ class IntroductionSpec extends FunSuite with Matchers with BeforeAndAfterEach {
   test("Future should fail if filter condition fails ") {
     val emptyTweet = Future.successful(Tweet("Homer", ""))
 
-    val emptyTweetFutureFailed = emptyTweet.filter(t => !t.message.isEmpty)
+    val emptyTweetFutureFailed: Future[Tweet] = ???
 
     Await.ready(emptyTweetFutureFailed, Inf).onComplete {
       case Failure(e) => e shouldBe a [NoSuchElementException]
@@ -93,7 +83,7 @@ class IntroductionSpec extends FunSuite with Matchers with BeforeAndAfterEach {
   test("Future should return same value if filter succeed ") {
     val tweet = Future.successful(Tweet("Homer", "Nice conference indeed!"))
 
-    val notEmptyTweetFuture = tweet.filter(t => !t.message.isEmpty)
+    val notEmptyTweetFuture: Future[Tweet] = ???
 
     Await.ready(notEmptyTweetFuture, Inf).onComplete {
       case Failure(_) => fail("Future should be successful")
@@ -137,8 +127,7 @@ class IntroductionSpec extends FunSuite with Matchers with BeforeAndAfterEach {
     // First dbCall should be resolved and only then apiCall can be performed since it need data from dbCall
 
     //perform dbCall and the using its result - apiCall
-    val tweetsFuture = dbCall(123)
-        .flatMap(user => apiCall(user.username))
+    val tweetsFuture: Future[List[Tweet]] = ???
 
     Await.result(tweetsFuture, Inf) shouldBe List(Tweet("Spongebob", "My pants are square shaped"))
   }
@@ -163,13 +152,7 @@ class IntroductionSpec extends FunSuite with Matchers with BeforeAndAfterEach {
     //      - do apiCall
     //
 
-    val result = cacheCall(123).flatMap { userOption =>
-      if (userOption.isEmpty) {
-        dbCall(123).flatMap(user => apiCall(user.username))
-      } else {
-        apiCall(userOption.get.username)
-      }
-    }
+    val result: Future[List[Tweet]] = ???
 
     // Try to write it with for comprehension
 
