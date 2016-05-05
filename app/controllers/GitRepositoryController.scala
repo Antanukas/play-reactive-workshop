@@ -15,10 +15,20 @@ class GitRepositoryController @Inject()(service: GitRepositoryService)
   import controllers.converters.JsonConverters._
 
   def search(query: String) = Action.async {
+    /*
+     * Task: Search
+     *
+     * Implement GitRepositoryService.search
+     */
     service.search(query).map(toOkJson(_))
   }
 
   def get(owner: String, name: String) = Action.async {
+    /*
+     * Task: Display repository information
+     *
+     * Implement GitRepositoryService.get
+     */
     service.get(GitHubRepositoryId(owner, name)).map(toOkJson(_))
   }
 }

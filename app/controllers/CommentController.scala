@@ -32,6 +32,11 @@ class CommentController @Inject() (commentService: CommentService)
   }
 
   def create(owner: String, name: String) = Action.async(parse.json) { implicit req =>
+    /*
+     * Task: Create Comment
+     *
+     * Implement CommentService.create
+     */
     val newComment = req.body.as[NewComment]
     commentService.create(GitHubRepositoryId(owner, name), newComment)(Some(newComment.userId)).map(toOkJson(_))
   }

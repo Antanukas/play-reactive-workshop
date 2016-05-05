@@ -1,43 +1,73 @@
 package services
 
 import clients.GithubClient
-import clients.Models.GithubRepositoryResponse
+import clients.Models.{GitHubRepositoriesResponse, GitHubRepositoryResponse}
 import com.google.inject.Inject
 import models.{GitHubRepositoryId, GitRepository}
-import repositories.{JdbcProfileProvider, CommentsRepository}
+import repositories.{CommentsRepository, JdbcProfileProvider}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class GitRepositoryService @Inject()(
-      githubClient: GithubClient,
-      commentService: CommentService,
-      commentsRepository: CommentsRepository,
-      jdbc: JdbcProfileProvider)(implicit ex: ExecutionContext) {
+  gitHubClient: GithubClient,
+  commentService: CommentService,
+  commentsRepository: CommentsRepository,
+  jdbc: JdbcProfileProvider)(implicit ex: ExecutionContext) {
 
   //Slick implicits
   import jdbc.provider._
-  import jdbc.provider.driver.api._
 
   def search(query: String): Future[Seq[GitRepository]] = {
-    githubClient.searchRepositories(query).flatMap { repos =>
-      Future.sequence(repos.items.map(fromGitHubResponse))
-    }
+    /*
+     * Task: Search
+     * 
+     * 1. Implement private method getCommentsCount
+     * 2. Implement private method fromGitHubResponse
+     * 3. Implement private method fromGitHubRepositoriesResponses
+     * 4. Use gitHubClient.searchRepositories and flatMap over fromGitHubRepositoriesResponses result
+     */
+    gitHubClient.searchRepositories(query).flatMap(fromGitHubRepositoriesResponses)
   }
 
-  def get(repoId: GitHubRepositoryId): Future[GitRepository] = {
-    //TODO retrieve full name from repository and call github api
-    githubClient.getRepository(repoId.owner, repoId.name).flatMap(fromGitHubResponse)
+  private def fromGitHubRepositoriesResponses(response: GitHubRepositoriesResponse): Future[Seq[GitRepository]] = {
+    Future.sequence(response.items.map(fromGitHubRepositoryResponse))
   }
 
-  private def fromGitHubResponse(gitHubRepositoryResponse: GithubRepositoryResponse): Future[GitRepository] = {
-    getCommentCount(toGitHubId(gitHubRepositoryResponse))
-      .map(commentCount => toGitRepository(gitHubRepositoryResponse, commentCount))
+  private def fromGitHubRepositoryResponse(response: GitHubRepositoryResponse): Future[GitRepository] = {
+    /*
+     * Task: Search
+     * 
+     * 1. First use getCommentCount.
+     *  You can use helper `toGitHubId` to get GitHubRepositoryId from GitHubRepositoryResponse
+     * 2. Use map on commentCount future and convert things to GitRepository
+      *   Use `toGitRepository` which will do mapping for you
+     */
+    getCommentCount(toGitHubId(response))
+      .map(commentCount => toGitRepository(response, commentCount))
   }
 
   private def getCommentCount(gitHubId: GitHubRepositoryId): Future[Long] =
+  /*
+   * Task: Search
+   * 
+   * 1. Use commentsRepository.getCommentCount
+   * 2. To convert DBIO to Future use `db.run` function
+   */
     db.run(commentsRepository.getCommentCount(gitHubId))
 
-  private def toGitRepository(repo: GithubRepositoryResponse, commentCount: Long): GitRepository = {
+
+  def get(repoId: GitHubRepositoryId): Future[GitRepository] = {
+    /*
+     * Task: Display repository information
+     * 
+     * 1. Use gitHubClient.getRepository
+     * 2. Use fromGitHubRepositoryResponse
+     */
+    gitHubClient.getRepository(repoId.owner, repoId.name).flatMap(fromGitHubRepositoryResponse)
+  }
+
+
+  private def toGitRepository(repo: GitHubRepositoryResponse, commentCount: Long): GitRepository = {
     GitRepository(
       toGitHubId(repo),
       repo.name,
@@ -47,7 +77,7 @@ class GitRepositoryService @Inject()(
       repo.owner.avatar_url)
   }
 
-  private def toGitHubId(repo: GithubRepositoryResponse): GitHubRepositoryId = {
+  private def toGitHubId(repo: GitHubRepositoryResponse): GitHubRepositoryId = {
     GitHubRepositoryId(repo.owner.login, repo.name)
   }
 }

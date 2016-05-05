@@ -51,3 +51,10 @@ $ activator run
 Open page http://localhost:9000
 
 You should see welcome page.
+
+# Tasks
+ Should be performed in this order. Search in code for string `Task: taskName`
+ 
+ - Task: Search
+ - Task: Display repository information
+ - Task: Create Comment

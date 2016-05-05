@@ -13,34 +13,75 @@ import slick.dbio.DBIO
 import scala.concurrent.{ExecutionContext, Future}
 
 class CommentService @Inject()(
-        eventPublisher: EventPublisher,
-        commentsRepository: CommentsRepository,
-        userRepository: UserRepository,
-        commentLikeRepository: CommentLikeRepository,
-        jdbc: JdbcProfileProvider)(implicit exec: ExecutionContext) {
+  eventPublisher: EventPublisher,
+  commentsRepository: CommentsRepository,
+  userRepository: UserRepository,
+  commentLikeRepository: CommentLikeRepository,
+  jdbc: JdbcProfileProvider)(implicit exec: ExecutionContext) {
 
   //Slick implicits for db.run
   import jdbc.provider._
 
-  def getRepositoryComments(repoId: GitHubRepositoryId)(implicit currentUserId: Option[UserId]): Future[Seq[Comment]] = db.run {
+  def getRepositoryComments(repoId: GitHubRepositoryId)
+    (implicit currentUserId: Option[UserId]): Future[Seq[Comment]] = db.run {
     commentsRepository.getCommentIdsByRepositoryId(repoId)
       .map(ids => ids.map(id => getComment(id)))
       .flatMap(DBIO.sequence(_))
   }
 
-  def create(repoId: GitHubRepositoryId, newComment: NewComment)(implicit currentUserId: Option[UserId]): Future[Comment] = db.run {
-    commentsRepository.insert(fromNewCommentToDb(repoId, newComment))
+  def create(repoId: GitHubRepositoryId, newComment: NewComment)
+    (implicit currentUserId: Option[UserId]): Future[Comment] = db.run {
+     /*
+      * Task: Create Comment
+      *
+      * 1. Implement insertNewComment
+      * 2. Implement getComment
+      * 3. Implement publishEvent
+      * 4. Combine these three fns to get the result
+      */
+    insertNewComment(repoId, newComment)
       .flatMap(inserted => getComment(inserted.id))
-      .map(comment => PublishableResult(comment, NewCommentEvent(repoId, comment.id)))
-      .map(eventPublisher.publishEventsAndReturnResult)
+      .map(publishEvent)
+  }
+
+  private def insertNewComment(repoId: GitHubRepositoryId, newComment: NewComment) = {
+    /*
+     * Task: Create Comment
+     *
+     * 1. use commentsRepository.insert
+     * 2. fromNewCommentToDb to map data to Database Comment model
+     */
+    commentsRepository.insert(fromNewCommentToDb(repoId, newComment))
   }
 
   private def getComment(commentId: CommentId)(implicit currentUserId: Option[UserId]): DBIO[Comment] = {
+    /*
+     * Task: Create Comment
+     *
+     * 1. Use commentsRepository.getComment
+     * 2. Then using its result use userRepository.getById
+     * 3. finally use toApiComment(comment, user) to get final result
+     */
+    val a: DBIO[Comment] = commentsRepository.getComment(commentId)
+      .flatMap(comment => userRepository.getById(comment.user)
+        .map(user => toApiComment(comment, user.get)))
+
     for {
       comment <- commentsRepository.getComment(commentId)
       likes <- commentLikeRepository.getLikes(commentId)
       user <- userRepository.getById(comment.user)
     } yield toApiComment(comment, user.get, likes)
+  }
+
+  private def publishEvent(comment: Comment): Comment = {
+    /*
+     * Task: Create Comment
+     *
+     * 1. Use eventPublished.publish to publish NewCommentEvent
+     * 2. Return same comment to be able to nicely use this function in map
+     */
+    eventPublisher.publish(NewCommentEvent(comment.gitHubId, comment.id))
+    comment
   }
 
   private def toApiComment(
@@ -70,7 +111,8 @@ class CommentService @Inject()(
       createdOn = DateTime.now)
   }
 
-  def getRepositoryCommentsSource(repoId: GitHubRepositoryId)(implicit currentUserId: Option[UserId]): Source[Seq[Comment], NotUsed] = {
+  def getRepositoryCommentsSource(repoId: GitHubRepositoryId)(implicit currentUserId: Option[UserId]):
+  Source[Seq[Comment], NotUsed] = {
     eventPublisher.subscribe
       .filter {
         case event: NewCommentEvent => event.gitHubId == repoId
