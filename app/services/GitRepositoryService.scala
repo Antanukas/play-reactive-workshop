@@ -63,7 +63,7 @@ class GitRepositoryService @Inject()(
      * 1. Use gitHubClient.getRepository
      * 2. Use fromGitHubRepositoryResponse
      */
-    gitHubClient.getRepository(repoId.owner, repoId.name).flatMap(fromGitHubRepositoryResponse)
+    ???
   }
 
 
