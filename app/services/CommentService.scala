@@ -54,9 +54,7 @@ class CommentService @Inject()(
       * 3. Implement publishEvent
       * 4. Combine these three fns to get the result
       */
-    insertNewComment(repoId, newComment)
-      .flatMap(inserted => getComment(inserted.id))
-      .map(publishEvent)
+    ???
   }
 
   private def insertNewComment(repoId: GitHubRepositoryId, newComment: NewComment) = {
@@ -66,7 +64,7 @@ class CommentService @Inject()(
      * 1. use commentsRepository.insert
      * 2. fromNewCommentToDb to map data to Database Comment model
      */
-    commentsRepository.insert(fromNewCommentToDb(repoId, newComment))
+    ???
   }
 
   private def getComment(commentId: CommentId)(implicit currentUserId: Option[UserId]): DBIO[Comment] = {
@@ -77,9 +75,7 @@ class CommentService @Inject()(
      * 2. Then using its result use userRepository.getById
      * 3. finally use toApiComment(comment, user) to get final result
      */
-    commentsRepository.getComment(commentId)
-      .flatMap(comment => userRepository.getById(comment.user)
-        .map(user => toApiComment(comment, user.get)))
+    ???
   }
 
   private def publishEvent(comment: Comment): Comment = {
@@ -89,8 +85,7 @@ class CommentService @Inject()(
      * 1. Use eventPublished.publish to publish NewCommentEvent
      * 2. Return same comment to be able to nicely use this function in map
      */
-    eventPublisher.publish(NewCommentEvent(comment.gitHubId, comment.id))
-    comment
+    ???
   }
 
   private def toApiComment(
