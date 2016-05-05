@@ -26,11 +26,17 @@ class GitRepositoryService @Inject()(
      * 3. Implement private method fromGitHubRepositoriesResponses
      * 4. Use gitHubClient.searchRepositories and flatMap over fromGitHubRepositoriesResponses result
      */
-    gitHubClient.searchRepositories(query).flatMap(fromGitHubRepositoriesResponses)
+    ???
   }
 
   private def fromGitHubRepositoriesResponses(response: GitHubRepositoriesResponse): Future[Seq[GitRepository]] = {
-    Future.sequence(response.items.map(fromGitHubRepositoryResponse))
+    /*
+     * Task: Search
+     *
+     * 1. Map response.items using fromGitHubRepositoryResponse
+     * 2. Use Future.sequence to convert Seq[Future] to Future[Seq]
+     */
+    ???
   }
 
   private def fromGitHubRepositoryResponse(response: GitHubRepositoryResponse): Future[GitRepository] = {
@@ -42,18 +48,18 @@ class GitRepositoryService @Inject()(
      * 2. Use map on commentCount future and convert things to GitRepository
       *   Use `toGitRepository` which will do mapping for you
      */
-    getCommentCount(toGitHubId(response))
-      .map(commentCount => toGitRepository(response, commentCount))
+    ???
   }
 
-  private def getCommentCount(gitHubId: GitHubRepositoryId): Future[Long] =
-  /*
+  private def getCommentCount(gitHubId: GitHubRepositoryId): Future[Long] = {
+    /*
    * Task: Search
    * 
    * 1. Use commentsRepository.getCommentCount
    * 2. To convert DBIO to Future use `db.run` function
    */
-    db.run(commentsRepository.getCommentCount(gitHubId))
+    ???
+  }
 
 
   def get(repoId: GitHubRepositoryId): Future[GitRepository] = {
