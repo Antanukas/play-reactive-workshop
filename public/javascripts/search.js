@@ -1,6 +1,5 @@
 
 $('#doSearch').click(function(event) {
-    console.log(event);
     $('#searchResultPanel').show();
     var searchText = $('#search').val();
     $('#loading').show();
