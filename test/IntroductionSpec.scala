@@ -48,8 +48,8 @@ class IntroductionSpec extends FunSuite with Matchers with BeforeAndAfterEach {
     val aMap = Map("key" -> 1, "key2" -> 2)
 
     //Lambdas, anonymous functions, etc.
-    val anonymousFunction: (String, String) => String = (a, b) => a + b
-    anonymousFunction("This is ", "Tieto Networking Conference") shouldBe "This is Tieto Networking Conference"
+    val lambda: (String, String) => String = (a, b) => a + b
+    lambda("This is ", "Tieto Networking Conference") shouldBe "This is Tieto Networking Conference"
 
     //Higher order functions
     List(1, 2 ,3).map(number => number * 2) shouldBe List(2, 4, 6)
@@ -117,14 +117,14 @@ class IntroductionSpec extends FunSuite with Matchers with BeforeAndAfterEach {
   }
 
   test("Composition of multiple independent Futures") {
-    val myNamePattern = Future { "My name is %s" }
-    val name = Future { "Antanas" }
+    val myNamePattern = Future { "This conference is called %s" }
+    val name = Future { "Tieto Networking Conference" }
 
     val result = myNamePattern.zip(name).map {
       case (pattern, name) => String.format(pattern, name)
     }
 
-    Await.result(result, Inf) shouldBe "My name is Antanas"
+    Await.result(result, Inf) shouldBe "This conference is called Tieto Networking Conference"
   }
 
 
