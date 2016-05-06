@@ -26,3 +26,6 @@ libraryDependencies ++= Seq(
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 
 routesImport += "controllers.converters.Binders._"
+
+
+fork in run := false
