@@ -126,10 +126,10 @@ function login() {
         localStorage.setItem('currentUser', JSON.stringify(user));
         adjustFormsVisibility();
         showUsername();
+        location.reload();
       }
     );
   }
-  location.reload();
 }
 
 function logout() {

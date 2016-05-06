@@ -6,10 +6,10 @@ import play.Configuration
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
-import clients.JsonConverters.{githubRepositoriesResponseRead, githubRepositoryOwnerRead, githubRepositoryResponseRead}
 
+class GitHubClient @Inject()(val ws: WSClient, val configuration: Configuration)(implicit ex: ExecutionContext) {
 
-class GithubClient @Inject()(val ws: WSClient, val configuration: Configuration)(implicit ex: ExecutionContext) {
+  import clients.JsonConverters._
 
   private val searchEndpoint = configuration.getString("github-api.search-endpoint")
   private val singleRepoEndpoint = configuration.getString("github-api.single-repo-endpoint")

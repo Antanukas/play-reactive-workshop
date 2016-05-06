@@ -1,6 +1,6 @@
 package services
 
-import clients.GithubClient
+import clients.GitHubClient
 import clients.Models.{GitHubRepositoriesResponse, GitHubRepositoryResponse}
 import com.google.inject.Inject
 import models.{GitHubRepositoryId, GitRepository}
@@ -9,7 +9,7 @@ import repositories.{CommentsRepository, JdbcProfileProvider}
 import scala.concurrent.{ExecutionContext, Future}
 
 class GitRepositoryService @Inject()(
-  gitHubClient: GithubClient,
+  gitHubClient: GitHubClient,
   commentService: CommentService,
   commentsRepository: CommentsRepository,
   jdbc: JdbcProfileProvider)(implicit ex: ExecutionContext) {
