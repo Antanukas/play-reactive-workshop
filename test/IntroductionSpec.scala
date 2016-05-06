@@ -64,7 +64,6 @@ class IntroductionSpec extends FunSuite with Matchers with BeforeAndAfterEach {
     //Or same with pair._1, pair._2
     List(("Pair1Item1", "Pair1Item2"), ("Pair2Item1","Pair2Item2"))
       .map(pair => (pair._2, pair._1)) shouldBe List(("Pair1Item2", "Pair1Item1"), ("Pair2Item2","Pair2Item1"))
-
   }
 
   case class User(userId: Long, username: String, twitterName: String)

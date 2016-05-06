@@ -18,7 +18,7 @@
 
       <h3>Agenda</h3>
       <ul>
-        <li>Introduction presentation</li>
+        <li>Introductory presentation</li>
         <ul>
           <li>Reactive Manifesto intro</li>
           <li>Writing non blocking code</li>
@@ -40,19 +40,44 @@
     <section>
       <blockquote>
         <strong>What?</strong>
-        <p>The Reactive Manifesto is a "bullshit bingo words dictionary", which incorporates distributed system design best practices.</p>
+        <p>
+          <span style="color: red" data-fragment-index="1">The Reactive Manifesto is a "bullshit bingo words dictionary"</span>,
+          <span style="color:#eae7ca" data-fragment-index="2">which incorporates distributed system design best practices.</span>
+        </p>
         <br/>
-        <strong>Why?</strong>
-        <ul>
-          <li>We need to communicate to business executives.</li>
-          <li>We need to talk on their language.</li>
-          <li>We need a bridge built of "bullshit bingo words".</li>
-        </ul>
+        <div span style="color:#eae7ca">
+          <strong>Why?</strong>
+          <ul>
+            <li>We need to communicate to business executives.</li>
+            <li>We need to talk on their language.</li>
+            <li>We need a bridge built of "bullshit bingo words".</li>
+          </ul>
+        </div>
       </blockquote>
       <small style="float: right">Alexey Migutsky</small>
     </section>
     <section>
       <img src="img/spongebob.gif">
+    </section>
+
+    <section>
+      <blockquote>
+        <strong>What?</strong>
+        <p>
+          <span style="color: red" data-fragment-index="1">The Reactive Manifesto is a "bullshit bingo words dictionary"</span>,
+          <span style="color: green" data-fragment-index="2">which incorporates distributed system design best practices.</span>
+        </p>
+        <br/>
+        <div data-fragment-index="3">
+          <strong>Why?</strong>
+          <ul>
+            <li>We need to communicate to business executives.</li>
+            <li>We need to talk on their language.</li>
+            <li>We need a bridge built of "bullshit bingo words".</li>
+          </ul>
+        </div>
+      </blockquote>
+      <small style="float: right">Alexey Migutsky</small>
     </section>
 
     <section>
@@ -99,7 +124,7 @@
 
     <section>
       <h3>Responsive</h3>
-      <strong>Systems focus on providing rapid and consistent response times</strong>
+      <strong>Systems focus on providing rapid and consistent response time</strong>
 
       <p>Builds end user confidence and encourages further interactions with system</p>
     </section>
@@ -115,7 +140,7 @@
       <h3>Elastic</h3>
       <strong>The system stays responsive under varying workload</strong>
 
-      <p>Reactive Systems can react to changes in the input rate by increasing or decreasing the resources allocated to service</p>
+      <p>Reactive Systems can react to changes in the input rate by increasing or decreasing the resources allocated to service.</p>
         <p>This implies designs that have no central bottlenecks</p>
     </section>
 
@@ -131,10 +156,6 @@
         <li>React to failures <strong>(resilient)</strong></li>
         <li>React to users <strong>(responsive)</strong></li>
       </ul>
-    </section>
-
-    <section>
-      <h2>Non blocking code</h2>
     </section>
 
     <section>
@@ -158,7 +179,7 @@
     </section>
 
     <section>
-      <strong>Lets translate this timing into human understandamble terms</strong>
+      <strong>Let's translate this timing into human understandable terms</strong>
       <br/>
       <h2>1 ns  ->  1 s</h2>
     </section>
@@ -181,7 +202,6 @@
       <ul>
         <li>A living object holding a value which may become available at some point</li>
         <li>Future executes asynchronously without blocking current thread</li>
-        <li>Uses ExecutionContext for concurrent execution </li>
       </ul>
     </section>
 
@@ -201,7 +221,6 @@
           def successful[T](result: T): Future[T]
           def failed[T](exception: Throwable): Future[T]
         }
-
       </pre>
 
     </section>
