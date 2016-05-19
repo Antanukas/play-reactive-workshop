@@ -53,8 +53,8 @@ val ed = eddy.copy(name = "Ed") // another instance
 ```
 case classes are immutable so instead of mutating we need to create new instance of it with copy method
 
-
------------
+&nbsp;&nbsp;
+&nbsp;&nbsp;
 
 ###Functions
 
@@ -68,12 +68,6 @@ def hello(msg: String): Unit = {
 product(5, 4)
 product(y = 4, x = 5) // named parameters
 
-def lazyFn(lazyArg: => String) = {
-  lazyArg
-}
-lazyFn("Hi!")
-lazyFn { "Hi!" } // lazy evaluation
-
 // lambdas
 val concatStr: (String, String) => String = (a, b) => a + b
 concatStr("Tieto", "Conference") // -> "Tieto Conference"
@@ -85,6 +79,7 @@ concatStr("Tieto", "Conference") // -> "Tieto Conference"
 ```scala
 List(1, 2 ,3).map(number => number * 2)  // List(1, 4, 6)
 List(1, 2, 3).flatMap(number => List(number * 2)) // same as above
+List(1, 2 ,3).map(number => List(number * 2)).flatten // same as above
 List(1, 2, 3).filter(number => number % 2 == 0) // List(2)
 ```
 
@@ -106,9 +101,17 @@ To perform transformations on collection higher order functions like `map` `filt
 
 Collections above are immutable. Mutable collections are present in  `scala.collection.mutable` package.
 
+&nbsp;    
+
 ----------
  
+&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
 &nbsp; 
+&nbsp;
+&nbsp;
 &nbsp;
 &nbsp;
 &nbsp;

@@ -16,6 +16,8 @@ class IntroductionSpec extends FunSuite with Matchers with BeforeAndAfterEach {
       "Simple Future"
     }
 
+    Future("Simple Future")
+
     Await.result(future, Inf) shouldBe "Simple Future"
   }
 
@@ -56,7 +58,6 @@ class IntroductionSpec extends FunSuite with Matchers with BeforeAndAfterEach {
 
     Await.result(tweetLengths, Inf) shouldBe List(3, 6, 3, 4, 2, 0)
   }
-
   test("Composition of multiple independent Futures") {
     val myNamePattern = Future { "This conference is called %s" }
     val name = Future { "Tieto Networking Conference" }
@@ -110,6 +111,7 @@ class IntroductionSpec extends FunSuite with Matchers with BeforeAndAfterEach {
    *
    * Returns Future[Option[User]] from user id. option is empty is user not exists in cache
    */
+
   var CACHE_RETURNS_VALUE = false
   def cacheCall(userId: Long): Future[Option[User]] = {
     if (CACHE_RETURNS_VALUE) Future.successful(Some(User(userId, "Spongebob","@Sponge")))
