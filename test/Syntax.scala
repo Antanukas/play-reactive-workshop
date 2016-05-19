@@ -1,8 +1,10 @@
 import org.scalatest.Matchers
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 object Syntax extends Matchers {
+
+  implicit val ec = ExecutionContext.global
 
   case class ExampleCaseClass(fieldOfTypeString: String)
   //When creating instance of case class no new keyword is needed
